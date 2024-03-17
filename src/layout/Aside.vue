@@ -7,55 +7,68 @@
           :default-active="defaultActive"
           class="el-menu-vertical-demo"
         >
-          <el-sub-menu :index="item.key" v-for="(item, i) in menuData" :key="i">
-            <template #title>
+          <template v-for="(item, i) in menuData" :key="i">
+            <el-sub-menu :index="item.key" v-if="item?.children?.length">
+              <template #title>
+                <span>{{ item.name }}</span>
+              </template>
+              <el-menu-item-group>
+                <el-menu-item
+                  v-for="(itemChildren, k) in item?.children"
+                  :key="k"
+                  :index="itemChildren.path"
+                >
+                  {{ itemChildren.name }}
+                </el-menu-item>
+              </el-menu-item-group>
+            </el-sub-menu>
+            <el-menu-item v-else :index="item.path">
               <span>{{ item.name }}</span>
-            </template>
-            <el-menu-item-group v-if="item?.children?.length">
-              <el-menu-item
-                v-for="(itemChildren, k) in item?.children"
-                :key="k"
-                :index="itemChildren.path"
-              >
-                {{ itemChildren.name }}
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-sub-menu>
+            </el-menu-item>
+          </template>
         </el-menu>
       </div>
     </dv-border-box13>
   </div>
 </template>
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, watch, reactive } from "vue";
 import { useRoute } from "vue-router";
 
-const { path, fullPath } = useRoute();
-console.log("useRoute", path, fullPath);
-let paths = "";
+const defaultActive = ref("");
+const route = useRoute();
 
-if (fullPath === "/") {
-  paths = "/model-import";
-} else {
-  paths = fullPath;
-}
-console.log("paths", fullPath, paths);
+watch(
+  () => route.path,
+  () => {
+    if (route.path == "/") {
+      defaultActive.value = "/model";
+    } else {
+      defaultActive.value = route.path;
+    }
+  },
+  { immediate: true }
+);
 
-let defaultActive = ref(paths);
 const menuData = reactive([
+  // {
+  //   key: "1",
+  //   name: "一次模型",
+  //   children: [
+  //     {
+  //       name: "模型导入",
+  //       path: "/model-import",
+  //     },
+  //     {
+  //       name: "模型配置",
+  //       path: "/model-configure",
+  //     },
+  //   ],
+  // },
   {
     key: "1",
-    name: "一次模型",
-    children: [
-      {
-        name: "模型导入",
-        path: "/model-import",
-      },
-      {
-        name: "模型配置",
-        path: "/model-configure",
-      },
-    ],
+    name: "模型管理",
+    path: "/model",
   },
   {
     key: "2",

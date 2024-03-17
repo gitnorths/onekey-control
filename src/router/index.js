@@ -6,6 +6,14 @@ const routes = [
     redirect: "/model-import",
   },
   {
+    name: "Model",
+    path: "/model",
+    component: () => import("@/view/model/index.vue"),
+    meta: {
+      title: "模型管理",
+    },
+  },
+  {
     name: "ModelImport",
     path: "/model-import",
     component: () => import("@/view/model/Import.vue"),
@@ -51,5 +59,23 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 });
+
+//路由跳转前做判断
+// router.beforeEach((to, from, next) => {
+//   console.log(to.path, from, next);
+//   let hasLogin = true; //从cookies中获取是否已登陆过的信息
+//   if (hasLogin) {
+//     next();
+//   } else {
+//     if (to.path == "/login") {
+//       next();
+//     } else {
+//       next({
+//         replace: true,
+//         name: "login",
+//       });
+//     }
+//   }
+// });
 
 export default router;

@@ -3,7 +3,7 @@
     <div class="oc-header__wrapper">
       <div class="oc-logo">
         <dv-decoration7>
-          <span>国网XX供电公司集控站设备监控系统</span>
+          <span>一键顺控测试管理工具</span>
         </dv-decoration7>
       </div>
     </div>

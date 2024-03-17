@@ -12,36 +12,17 @@
             <el-option label="场站2" value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="文件">
-          <el-select
-            v-model="formInline.voltage"
-            placeholder="请选择"
-            clearable
+        <el-form-item v-show="false">
+          <el-button type="primary" @click="onSubmit"
+            >配置全局解析字典</el-button
           >
-            <el-option label="文件1" value="1" />
-            <el-option label="文件2" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="导入间隔">
-          <el-select v-model="formInline.bay" placeholder="请选择" clearable>
-            <el-option label="间隔1" value="1" />
-            <el-option label="间隔2" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-icon :size="20" color="#ffffff">
-            <Setting />
-          </el-icon>
-          <el-text>配置全局解析字典</el-text>
-        </el-form-item>
-        <el-form-item>
           <el-button type="primary" @click="onSubmit">导入</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="oc-box__main">
       <div class="deploy-import">
-        <el-form>
+        <el-form v-if="false">
           <el-form-item>
             <dv-decoration-11 style="width: 260px; height: 60px">
               <el-text size="large">解析进度概览</el-text>
@@ -61,12 +42,15 @@
           </el-form-item>
           <el-form-item label="已解析失败间隔数量">
             <el-text>1</el-text>
-            <el-link type="success">查看结果</el-link>
+            <el-link type="success">查看失败详情</el-link>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit">解析结果确认</el-button>
           </el-form-item>
         </el-form>
+        <div v-else class="oc-empty">
+          <el-empty description="暂无数据" />
+        </div>
       </div>
     </div>
   </div>

@@ -17,7 +17,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="电压等级">
+        <!-- <el-form-item label="电压等级">
           <el-select
             v-model="voltage"
             placeholder="请选择"
@@ -61,17 +61,17 @@
               :value="item.oid"
             />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
-          <el-button type="primary" @click="onImport">导入</el-button>
+          <el-button type="primary" @click="onModalImport">模型导入</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="oc-box__main">
       <el-table
+        v-if="tableData.length > 0"
         :data="tableData"
         style="width: 100%"
-        v-if="tableData.length > 0"
       >
         <el-table-column
           v-for="(item, i) in tableColumns"
@@ -113,13 +113,6 @@
         <span class="dialog-footer">
           <el-button @click="uploadFormVisible = false">取消</el-button>
           <el-button
-            type="success"
-            v-if="uploadFileList.length > 0"
-            @click="uploadFormVisible = false"
-          >
-            预览
-          </el-button>
-          <el-button
             type="primary"
             :disabled="uploadFileList.length == 0"
             :loading="uploadLoading"
@@ -134,14 +127,8 @@
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import { mokeGet } from "../../api/";
-import { fieldTypes } from "../../enums/options";
-import { find, keyBy } from "lodash";
 import { ElMessage, ElMessageBox } from "element-plus";
-
-const formInline = reactive({
-  bay: "",
-});
+import { mokeGet } from "@/api";
 
 const station = ref(null);
 const stationOptions = ref([]);
@@ -152,21 +139,20 @@ const bayOptions = ref([]);
 const device = ref(null);
 const deviceOptions = ref([]);
 const tableData = ref([]);
-const tableColumns = reactive([
-  { prop: "index", label: "序号", width: "70px" },
-  { prop: "appName", label: "app名称" },
-  { prop: "name", label: "名称" },
-  { prop: "oid", label: "OID" },
+const tableColumns = ref([
+  // { prop: "index", label: "序号", width: "70px" },
+  // { prop: "appName", label: "app名称" },
+  // { prop: "name", label: "名称" },
+  // { prop: "oid", label: "OID" },
 ]);
 
-let fileNames = "220kV梧桐变 - 台账信息表.xls";
-let bays = [];
+// 导入信息
 const uploadTitle = ref("模型导入");
 const uploadFormVisible = ref(false);
 const uploadLoading = ref(false);
 const uploadForm = reactive({});
 const uploadRef = ref();
-const uploadUrl = ref("/api/uploadDevstatus");
+const uploadUrl = ref("/api/uploadModel");
 const uploadFileList = ref([]);
 
 //查询场站
@@ -180,9 +166,12 @@ const getStation = () => {
           value: item.oid,
         };
       });
-      station.value = res.data[0].oid;
-      getDigtal(res.data[0].name, res.data[0].oid); // 查询信号
-      getVoltage(res.data[0].oid); // 查询电压等级
+
+      const resData = res.data[0];
+      station.value = resData.oid;
+      // getDigtal(resData.name, resData.oid); // 查询信号
+      getVoltage(resData.oid); // 查询电压等级
+      getModelInfo(resData.name); // 查询模型解析结果
     }
   });
 };
@@ -255,6 +244,27 @@ const getDigtal = (name, oid) => {
     });
 };
 
+// 查询模型解析结果
+const getModelInfo = (value) => {
+  mokeGet("getModelInfo", {
+    station: value,
+  }).then((res) => {
+    tableColumns.value = [];
+    tableData.value = [];
+    if (!res?.data) return;
+    const resData = res.data[0][value];
+    const column = resData[0]; // 表头
+    for (const key in column) {
+      if (Object.hasOwnProperty.call(column, key)) {
+        const name = column[key];
+        tableColumns.value.push({ prop: key, label: name });
+      }
+    }
+    resData.shift(); // 删除数组第一项
+    tableData.value = resData;
+  });
+};
+
 // 监听select变化
 const handleSelectChange = (action, value) => {
   switch (action) {
@@ -265,17 +275,21 @@ const handleSelectChange = (action, value) => {
         device.value = null;
 
         if (value) {
+          getVoltage(value); // 查询电压等级
           const obj = stationOptions.value.find((item) => {
             return item.oid === value;
           });
-          getVoltage(value); // 查询电压等级
-          getDigtal(obj.appName, value); // 查询信号
+          // getDigtal(obj.appName, value); // 查询信号
+          getModelInfo(obj.name);
         } else {
           voltageOptions.value = [];
           bayOptions.value = [];
           deviceOptions.value = [];
 
-          getDigtal(); // 查询信号
+          tableColumns.value = [];
+          tableData.value = [];
+
+          // getDigtal(); // 查询信号
         }
       }
 
@@ -286,19 +300,19 @@ const handleSelectChange = (action, value) => {
         device.value = null;
 
         if (value) {
-          const obj = voltageOptions.value.find((item) => {
-            return item.oid === value;
-          });
           getBays(value); // 查询间隔
-          getDigtal(obj.appName, value); // 查询信号
+          // const obj = voltageOptions.value.find((item) => {
+          //   return item.oid === value;
+          // });
+          // getDigtal(obj.appName, value); // 查询信号
         } else {
           bayOptions.value = [];
           deviceOptions.value = [];
 
-          const obj = stationOptions.value.find((item) => {
-            return item.oid === station.value;
-          });
-          getDigtal(obj.appName, station.value); // 查询信号
+          // const obj = stationOptions.value.find((item) => {
+          //   return item.oid === station.value;
+          // });
+          // getDigtal(obj.appName, station.value); // 查询信号
         }
       }
 
@@ -308,18 +322,19 @@ const handleSelectChange = (action, value) => {
         device.value = null;
 
         if (value) {
-          const obj = bayOptions.value.find((item) => {
-            return item.oid === value;
-          });
           getDevice(value); // 查询设备
-          getDigtal(obj.appName, value); // 查询信号
+
+          // const obj = bayOptions.value.find((item) => {
+          //   return item.oid === value;
+          // });
+          // getDigtal(obj.appName, value); // 查询信号
         } else {
           deviceOptions.value = [];
 
-          const obj = voltageOptions.value.find((item) => {
-            return item.oid === voltage.value;
-          });
-          getDigtal(obj.appName, voltage.value); // 查询信号
+          // const obj = voltageOptions.value.find((item) => {
+          //   return item.oid === voltage.value;
+          // });
+          // getDigtal(obj.appName, voltage.value); // 查询信号
         }
       }
 
@@ -327,16 +342,17 @@ const handleSelectChange = (action, value) => {
     case "device":
       {
         if (value) {
-          const obj = deviceOptions.value.find((item) => {
-            return item.oid === value;
-          });
           getDevice(value); // 查询设备
-          getDigtal(obj.appName, value); // 查询信号
+
+          // const obj = deviceOptions.value.find((item) => {
+          //   return item.oid === value;
+          // });
+          // getDigtal(obj.appName, value); // 查询信号
         } else {
-          const obj = bayOptions.value.find((item) => {
-            return item.oid === bay.value;
-          });
-          getDigtal(obj.appName, bay.value); // 查询信号
+          // const obj = bayOptions.value.find((item) => {
+          //   return item.oid === bay.value;
+          // });
+          // getDigtal(obj.appName, bay.value); // 查询信号
         }
       }
 
@@ -347,7 +363,7 @@ const handleSelectChange = (action, value) => {
   }
 };
 
-const onImport = () => {
+const onModalImport = () => {
   uploadFormVisible.value = true;
 };
 

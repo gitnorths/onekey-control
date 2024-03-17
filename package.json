@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@kjgl77/datav-vue3": "^1.7.1",
+    "axios": "^1.6.5",
     "element-plus": "^2.4.4",
+    "lodash": "^4.17.21",
+    "luckyexcel": "^1.0.1",
     "sass": "^1.69.7",
     "vue": "^3.3.4",
     "vue-router": "^4.0.13"
