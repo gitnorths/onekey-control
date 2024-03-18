@@ -112,6 +112,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { mokeGet } from "@/api";
+import { baseUrl } from "@/config";
 
 const station = ref(null);
 const stationName = ref(null);
@@ -131,7 +132,7 @@ const uploadFormVisible = ref(false);
 const uploadLoading = ref(false);
 const uploadForm = reactive({});
 const uploadRef = ref();
-const uploadUrl = ref("/api/uploadOptabInfo");
+const uploadUrl = ref(baseUrl + "/uploadOptabInfo");
 const uploadFileList = ref([]);
 
 //查询场站

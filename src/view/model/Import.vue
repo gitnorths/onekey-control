@@ -182,7 +182,7 @@ const getStation = () => {
       });
       station.value = res.data[0].oid;
       getDigtal(res.data[0].name, res.data[0].oid); // 查询信号
-      getVoltage(res.data[0].oid); // 查询电压等级
+      // getVoltage(res.data[0].oid); // 查询电压等级
     }
   });
 };
@@ -268,7 +268,7 @@ const handleSelectChange = (action, value) => {
           const obj = stationOptions.value.find((item) => {
             return item.oid === value;
           });
-          getVoltage(value); // 查询电压等级
+          // getVoltage(value); // 查询电压等级
           getDigtal(obj.appName, value); // 查询信号
         } else {
           voltageOptions.value = [];

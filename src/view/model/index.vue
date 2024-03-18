@@ -129,6 +129,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { mokeGet } from "@/api";
+import { baseUrl } from "@/config";
 
 const station = ref(null);
 const stationOptions = ref([]);
@@ -152,7 +153,7 @@ const uploadFormVisible = ref(false);
 const uploadLoading = ref(false);
 const uploadForm = reactive({});
 const uploadRef = ref();
-const uploadUrl = ref("/api/uploadModel");
+const uploadUrl = ref(baseUrl + "/uploadModel");
 const uploadFileList = ref([]);
 
 //查询场站
@@ -170,7 +171,7 @@ const getStation = () => {
       const resData = res.data[0];
       station.value = resData.oid;
       // getDigtal(resData.name, resData.oid); // 查询信号
-      getVoltage(resData.oid); // 查询电压等级
+      // getVoltage(resData.oid); // 查询电压等级
       getModelInfo(resData.name); // 查询模型解析结果
     }
   });
@@ -275,7 +276,7 @@ const handleSelectChange = (action, value) => {
         device.value = null;
 
         if (value) {
-          getVoltage(value); // 查询电压等级
+          // getVoltage(value); // 查询电压等级
           const obj = stationOptions.value.find((item) => {
             return item.oid === value;
           });

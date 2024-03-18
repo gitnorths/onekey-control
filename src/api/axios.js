@@ -7,6 +7,7 @@ const instance = axios.create({
   timeout: 6000, // 设置超时
   headers: {
     "Content-Type": "application/json;charset=UTF-8",
+    // "Access-Control-Allow-Origin": "*",
   },
 });
 
@@ -38,7 +39,6 @@ instance.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    console.log(error);
     // 响应报错
     if (error.response && error.response.status) {
       const status = error.response.status;
