@@ -13,22 +13,22 @@ const routes = [
       title: "模型管理",
     },
   },
-  {
-    name: "ModelImport",
-    path: "/model-import",
-    component: () => import("@/view/model/Import.vue"),
-    meta: {
-      title: "模型导入",
-    },
-  },
-  {
-    name: "ModelConfigure",
-    path: "/model-configure",
-    component: () => import("@/view/model/configure.vue"),
-    meta: {
-      title: "模型配置",
-    },
-  },
+  // {
+  //   name: "ModelImport",
+  //   path: "/model-import",
+  //   component: () => import("@/view/model/Import.vue"),
+  //   meta: {
+  //     title: "模型导入",
+  //   },
+  // },
+  // {
+  //   name: "ModelConfigure",
+  //   path: "/model-configure",
+  //   component: () => import("@/view/model/configure.vue"),
+  //   meta: {
+  //     title: "模型配置",
+  //   },
+  // },
   {
     name: "DeployImport",
     path: "/deploy-import",
