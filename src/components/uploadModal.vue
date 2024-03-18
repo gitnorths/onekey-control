@@ -3,6 +3,10 @@
     v-model="visible"
     :title="props.title"
     :width="props.width"
+    :show-close="false"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    destroy-on-close
     modal-class="dialog-import"
   >
     <el-form :model="uploadForm">
@@ -78,9 +82,8 @@ const handlePreview = (uploadFile) => {
 };
 
 const handleSuccess = (res) => {
-  console.log(res);
-  if (res.code == 0 && res?.data?.length) {
-    uploadLoading.value = false;
+  uploadLoading.value = false;
+  if (res.code == 0) {
     ElMessage({
       message: "上传成功！",
       type: "success",

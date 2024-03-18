@@ -182,7 +182,7 @@ const onModalImport = () => {
     uploadVisible.value = !uploadVisible.value;
     uploadTitle.value = "设备态模型导入";
     uploadWidth.value = "550px";
-    uploadUrl.value = baseUrl + "/uploadOptabInfo";
+    uploadUrl.value = baseUrl + "/uploadDevstatus";
   }
 };
 
