@@ -1,7 +1,7 @@
 <template>
   <div class="oc-box device-task">
-    <div class="oc-box__header" v-show="false">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+    <div class="oc-box__header">
+      <el-form :inline="true" class="demo-form-inline">
         <el-form-item>
           <el-button type="primary" @click="onModalImport">
             顺控票导入
@@ -51,67 +51,26 @@
         <el-empty description="暂无数据" />
       </div>
     </div>
-    <el-dialog
-      v-model="uploadFormVisible"
+    <UploadModal
+      v-model="uploadVisible"
       :title="uploadTitle"
-      modal-class="dialog-import"
-    >
-      <el-form :model="uploadForm">
-        <el-upload
-          ref="uploadRef"
-          v-model:file-list="uploadFileList"
-          class="upload-demo"
-          :action="uploadUrl"
-          :auto-upload="false"
-          multiple
-          accept="file"
-          :limit="1"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :before-remove="beforeRemove"
-          :on-success="handleSuccess"
-        >
-          <el-button type="primary">选择上传文件</el-button>
-          <template #tip> </template>
-        </el-upload>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="uploadFormVisible = false">取消</el-button>
-          <el-button
-            type="primary"
-            :disabled="uploadFileList.length == 0"
-            :loading="uploadLoading"
-            @click="submitUpload"
-          >
-            上传<span v-if="uploadLoading">中</span>
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
+      :width="uploadWidth"
+      :url="uploadUrl"
+      @cancel="uploadCancel"
+    ></UploadModal>
   </div>
 </template>
 <script setup>
 import { reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { mokeGet } from "@/api";
+import { baseUrl } from "@/config";
+import UploadModal from "@/components/uploadModal.vue";
 
-const uploadTitle = ref("设备态导入");
-const uploadFormVisible = ref(false);
-const uploadLoading = ref(false);
-const uploadForm = reactive({});
-const uploadRef = ref();
-const uploadUrl = ref("/api/uploadOptabInfo");
-const uploadFileList = ref([]);
-
-const formInline = reactive({
-  station: "",
-  voltage: "",
-  classification: "",
-});
-
-const onSubmit = () => {
-  console.log("submit!");
-};
+// 导入信息
+const uploadVisible = ref(false);
+const uploadTitle = ref(null);
+const uploadWidth = ref(null);
+const uploadUrl = ref(null);
 
 const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
   if (columnIndex === 0 || columnIndex === 1 || columnIndex === 4) {
@@ -163,46 +122,16 @@ const tableData = [
 ];
 
 const onModalImport = () => {
-  uploadFormVisible.value = true;
-};
-
-const handleRemove = (file, uploadFiles) => {
-  console.log(file, uploadFiles);
-};
-
-const handlePreview = (uploadFile) => {
-  console.log(uploadFile);
-};
-
-const handleSuccess = (res) => {
-  console.log(res);
-  if (res.code == 0 && res?.data?.length) {
-    uploadLoading.value = false;
-    uploadFormVisible.value = false;
-    ElMessage({
-      message: "上传成功！",
-      type: "success",
-    });
-  } else {
-    ElMessage.error(res.desc);
+  if (!uploadVisible.value) {
+    uploadVisible.value = !uploadVisible.value;
+    uploadTitle.value = "顺控票模型导入";
+    uploadWidth.value = "550px";
+    uploadUrl.value = baseUrl + "/uploadOptabInfo";
   }
 };
 
-const beforeRemove = (uploadFile, uploadFiles) => {
-  return ElMessageBox.confirm(`确定删除已选择的文件 - ${uploadFile.name} ?`, {
-    confirmButtonText: "删除",
-    cancelButtonText: "取消",
-    // center: true,
-    type: "warning",
-  }).then(
-    () => true,
-    () => false
-  );
-};
-
-const submitUpload = () => {
-  uploadLoading.value = true;
-  uploadRef.value.submit();
+const uploadCancel = () => {
+  uploadVisible.value = false;
 };
 </script>
 

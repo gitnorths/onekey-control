@@ -88,5 +88,10 @@ const menuData = reactive([
       },
     ],
   },
+  {
+    key: "3",
+    name: "配置管理",
+    path: "/setting",
+  },
 ]);
 </script>

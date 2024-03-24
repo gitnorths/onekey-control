@@ -15,6 +15,29 @@
     --el-border-color-lighter   : initial;
 }
 
+html.dark {
+    --vxe-toolbar-background-color       : rgba(0, 0, 0, 0);
+    --vxe-button-default-background-color: #155093;
+    --vxe-input-border-color             : #0077ff;
+    --vxe-input-background-color         : #00132a;
+    --vxe-font-color                     : #A3A6AD;
+    --vxe-primary-color                  : #2C7ECF;
+    --vxe-primary-lighten-color          : #1dc1f5;
+    --vxe-icon-background-color          : #A3A6AD;
+    --vxe-table-font-color               : #A3A6AD;
+    --vxe-table-resizable-color          : #A3A6AD;
+    --vxe-table-header-background-color  : #155093;
+    --vxe-table-header-font-color        : #A3A6AD;
+    --vxe-table-body-background-color    : rgba(0, 0, 0, 0.5);
+    --vxe-table-background-color         : #4a5663;
+    --vxe-table-border-width             : 1px;
+    --vxe-table-border-color             : #00132a;
+
+    --vxe-modal-header-background-color: #155093;
+    --vxe-modal-body-background-color  : #155093;
+    --vxe-modal-border-color           : #000000;
+}
+
 html,
 body {
     margin : 0;

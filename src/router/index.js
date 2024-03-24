@@ -13,22 +13,6 @@ const routes = [
       title: "模型管理",
     },
   },
-  // {
-  //   name: "ModelImport",
-  //   path: "/model-import",
-  //   component: () => import("@/view/model/Import.vue"),
-  //   meta: {
-  //     title: "模型导入",
-  //   },
-  // },
-  // {
-  //   name: "ModelConfigure",
-  //   path: "/model-configure",
-  //   component: () => import("@/view/model/configure.vue"),
-  //   meta: {
-  //     title: "模型配置",
-  //   },
-  // },
   {
     name: "DeployImport",
     path: "/deploy-import",
@@ -51,6 +35,14 @@ const routes = [
     component: () => import("@/view/deploy/SequentialControlVote.vue"),
     meta: {
       title: "顺控票解析",
+    },
+  },
+  {
+    name: "Setting",
+    path: "/setting",
+    component: () => import("@/view/setting/index.vue"),
+    meta: {
+      title: "配置管理",
     },
   },
 ];

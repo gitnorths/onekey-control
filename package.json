@@ -16,7 +16,8 @@
     "luckyexcel": "^1.0.1",
     "sass": "^1.69.7",
     "vue": "^3.3.4",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vxe-table": "^4.5.21"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",

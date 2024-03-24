@@ -49,17 +49,17 @@
             v-else
           >
             <template #default="scope">
-              <el-button
+              <!-- <el-button
                 type="warning"
                 size="small"
                 @click="handleEdit(scope.$index, scope.row)"
               >
                 修正
-              </el-button>
+              </el-button> -->
               <el-button
                 type="success"
                 size="small"
-                @click="handleEdit(scope.$index, scope.row)"
+                @click="handleConfirm(scope.$index, scope.row)"
               >
                 确认
               </el-button>
@@ -75,6 +75,12 @@
       :url="uploadUrl"
       @cancel="uploadCancel"
     ></UploadModal>
+    <AnalysisModal
+      v-model="analysisVisible"
+      :title="analysisTitle"
+      :width="analysisWidth"
+      @cancel="analysisCancel"
+    ></AnalysisModal>
   </div>
 </template>
 <script setup>
@@ -82,6 +88,7 @@ import { onMounted, ref } from "vue";
 import { mokeGet } from "@/api";
 import { baseUrl } from "@/config";
 import UploadModal from "@/components/uploadModal.vue";
+import AnalysisModal from "@/components/AnalysisModal.vue";
 
 const station = ref(null);
 const stationName = ref(null);
@@ -101,6 +108,11 @@ const uploadVisible = ref(false);
 const uploadTitle = ref(null);
 const uploadWidth = ref(null);
 const uploadUrl = ref(null);
+
+// 确认信息
+const analysisVisible = ref(false);
+const analysisTitle = ref(null);
+const analysisWidth = ref(null);
 
 //查询场站
 const getStation = () => {
@@ -128,6 +140,7 @@ const getDevstatus = (value) => {
     station: value,
   }).then((res) => {
     if (!res?.data) return;
+    tableData.value = [];
     const arr = [];
     for (let i = 0; i < res.data.length; i++) {
       const dataStatus = res.data[i].status;
@@ -138,8 +151,8 @@ const getDevstatus = (value) => {
             index: dataMap.sequence,
             state: dataMap.status,
             condition:
-              item.voltage + item.inteval + item.dev + item.jieci + item.status,
-            parseResults: `${item.voltage}/${item.inteval}/${item.dev}/${item.jieci}/“/${item.status}/”"`,
+              item.voltage + item.bay + item.dev + item.operate + item.yxValue,
+            parseResults: `${item.voltage}/${item.bay}/${item.dev}/${item.operate}/${item.yxValue}`,
           });
         });
       }
@@ -177,6 +190,7 @@ const handleSelectChange = (action, value) => {
   }
 };
 
+// 导入
 const onModalImport = () => {
   if (!uploadVisible.value) {
     uploadVisible.value = !uploadVisible.value;
@@ -186,8 +200,21 @@ const onModalImport = () => {
   }
 };
 
+// 导入取消
 const uploadCancel = () => {
   uploadVisible.value = false;
+};
+
+// 确认信息
+const handleConfirm = () => {
+  analysisVisible.value = true;
+  analysisTitle.value = "确认信息";
+  analysisWidth.value = "450px";
+};
+
+// 确认信息取消
+const analysisCancel = () => {
+  analysisVisible.value = false;
 };
 
 onMounted(() => {
