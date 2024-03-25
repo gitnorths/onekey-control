@@ -1,18 +1,30 @@
 :root {
-    --el-fill-color-blank       : initial;
+    --el-bg-color               : #000000;
+    --el-bg-color-overlay       : #155093;
     --el-border-color           : #155093;
     --el-border-color-hover     : #1dc1f5;
-    --el-bg-color-overlay       : #155093;
     --el-border-color-light     : #155093;
+    --el-border-color-lighter   : initial;
     --el-text-color-regular     : #FFFFFF;
+    --el-fill-color-blank       : initial;
     --el-fill-color-light       : rgba(0, 0, 0, 0.5);
+    --el-fill-color-lighter     : #001b3a;
     --el-menu-bg-color          : transparent;
     --el-menu-base-level-padding: 10px;
     --el-menu-text-color        : #FFFFFF;
     --el-menu-item-height       : 40px;
     --el-menu-hover-bg-color    : #155093;
-    --el-bg-color               : rgba(0, 0, 0, 0.5);
-    --el-border-color-lighter   : initial;
+
+    .el-table {
+        --el-table-header-bg-color: #155093;
+
+        &--enable-row-hover {
+            .el-table__body tr:hover>td.el-table__cell {
+                --el-table-row-hover-bg-color: #003673;
+            }
+        }
+    }
+
 }
 
 html.dark {
@@ -173,9 +185,14 @@ body {
     }
 
     &__main {
-        height : calc(100% - 75px);
-        padding: 15px;
+        height    : calc(100% - 60px);
+        // height : 78vh;
+        padding   : 15px;
     }
+}
+
+.oc-table {
+    // height: 70vh;
 }
 
 .oc-empty {

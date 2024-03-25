@@ -25,7 +25,7 @@
       </el-form>
     </div>
     <div class="oc-box__main">
-      <div class="device-state__text">
+      <div class="device-state__text" v-if="false">
         <dv-decoration-11 style="width: 500px; height: 60px">
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
@@ -33,6 +33,9 @@
       <el-table
         :data="tableData"
         :span-method="objectSpanMethod"
+        class="oc-table"
+        height="100%"
+        stripe
         style="width: 100%"
       >
         <template v-for="(item, i) in tableColumn" :key="i">
@@ -41,11 +44,13 @@
             :prop="item.prop"
             :label="item.label"
             :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null"
           />
           <el-table-column
             :prop="item.prop"
             :label="item.label"
             :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null"
             v-else
           >
             <template #default="scope">
@@ -57,7 +62,7 @@
                 修正
               </el-button> -->
               <el-button
-                type="success"
+                type="warning"
                 size="small"
                 @click="handleConfirm(scope.$index, scope.row)"
               >
@@ -79,6 +84,7 @@
       v-model="analysisVisible"
       :title="analysisTitle"
       :width="analysisWidth"
+      :data="analysisData"
       @cancel="analysisCancel"
     ></AnalysisModal>
   </div>
@@ -95,11 +101,11 @@ const stationName = ref(null);
 const stationOptions = ref([]);
 
 const tableColumn = ref([
-  { prop: "index", label: "序号", width: "100px" },
+  { prop: "index", label: "序号", width: "80px", align: "center" },
   { prop: "state", label: "状态" },
   { prop: "condition", label: "条件" },
   { prop: "parseResults", label: "解析结果" },
-  { prop: "operator", label: "操作", width: "150px" },
+  { prop: "operator", label: "操作", width: "150px", align: "center" },
 ]);
 const tableData = ref([]);
 
@@ -113,6 +119,7 @@ const uploadUrl = ref(null);
 const analysisVisible = ref(false);
 const analysisTitle = ref(null);
 const analysisWidth = ref(null);
+const analysisData = ref({})
 
 //查询场站
 const getStation = () => {
@@ -148,8 +155,10 @@ const getDevstatus = (value) => {
         const dataMap = dataStatus[j];
         dataMap.parseMap.forEach((item) => {
           tableData.value.push({
+            ...item,
             index: dataMap.sequence,
             state: dataMap.status,
+            station: res.data[i].station,
             condition:
               item.voltage + item.bay + item.dev + item.operate + item.yxValue,
             parseResults: `${item.voltage}/${item.bay}/${item.dev}/${item.operate}/${item.yxValue}`,
@@ -206,10 +215,12 @@ const uploadCancel = () => {
 };
 
 // 确认信息
-const handleConfirm = () => {
+const handleConfirm = (ids, rows) => {
+  console.log(ids, rows);
   analysisVisible.value = true;
   analysisTitle.value = "确认信息";
   analysisWidth.value = "450px";
+  analysisData.value = rows
 };
 
 // 确认信息取消
