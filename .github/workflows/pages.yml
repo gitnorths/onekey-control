@@ -1,10 +1,10 @@
 # 将静态内容部署到 GitHub Pages 的简易工作流程
-name: Deploy static content to Pages
+name: Deploy pages content to Pages
 
 on:
   # 仅在推送到默认分支时运行。
   push:
-    branches: ['main']
+    branches: ["main"]
 
   # 这个选项可以使你手动在 Action tab 页面触发工作流
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
 
 # 允许一个并发的部署
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 # ----分割线：上面的内容与静态网址是一样的，一般不用改-----
@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - name: Install dependencies
         run: npm install
       - name: Build
@@ -47,7 +47,17 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload dist repository
-          path: './dist'
+          path: "./dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+    #   - name: Sync to Gitee
+    #     uses: wearerequired/git-mirror-action@master
+    #     env:
+    #       # 注意在 Settings->Secrets 配置 GITEE_RSA_PRIVATE_KEY
+    #       SSH_PRIVATE_KEY: ${{ secrets.GITEE_RSA_PRIVATE_KEY }}
+    #     with:
+    #       # 注意替换为你的 GitHub 源仓库地址
+    #       source-repo: git@github.com:gitnorths/onekey-control.git
+    #       # 注意替换为你的 Gitee 目标仓库地址
+    #       destination-repo: git@gitee.com:vindas/onekey-control.git
