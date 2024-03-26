@@ -12,6 +12,7 @@
     </div>
     <div class="oc-box__main">
       <vxe-table
+        stripe
         border
         show-overflow
         keep-source

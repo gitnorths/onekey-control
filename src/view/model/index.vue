@@ -98,7 +98,7 @@
 import { onMounted, ref } from "vue";
 import { mokeGet } from "@/api";
 import { baseUrl } from "@/config";
-import UploadModal from "@/components/uploadModal.vue";
+import UploadModal from "@/components/UploadModal.vue";
 
 const station = ref(null);
 const stationOptions = ref([]);

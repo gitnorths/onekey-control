@@ -30,11 +30,14 @@
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
       </div>
+      <div v-if="!tableData.length" class="oc-empty">
+        <el-empty description="暂无数据" />
+      </div>
       <el-table
+        v-else
         :data="tableData"
         :span-method="objectSpanMethod"
         class="oc-table"
-        height="100%"
         stripe
         style="width: 100%"
       >
@@ -80,21 +83,22 @@
       :url="uploadUrl"
       @cancel="uploadCancel"
     ></UploadModal>
-    <AnalysisModal
-      v-model="analysisVisible"
-      :title="analysisTitle"
-      :width="analysisWidth"
-      :data="analysisData"
-      @cancel="analysisCancel"
-    ></AnalysisModal>
+    <DSModal
+      v-model="modalVisible"
+      :title="modalTitle"
+      :width="modalWidth"
+      :data="modalData"
+      @confirm="modalConfirm"
+      @cancel="modalCancel"
+    ></DSModal>
   </div>
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
 import { mokeGet } from "@/api";
 import { baseUrl } from "@/config";
-import UploadModal from "@/components/uploadModal.vue";
-import AnalysisModal from "@/components/AnalysisModal.vue";
+import UploadModal from "@/components/UploadModal.vue";
+import DSModal from "@/components/DSModal.vue";
 
 const station = ref(null);
 const stationName = ref(null);
@@ -116,10 +120,10 @@ const uploadWidth = ref(null);
 const uploadUrl = ref(null);
 
 // 确认信息
-const analysisVisible = ref(false);
-const analysisTitle = ref(null);
-const analysisWidth = ref(null);
-const analysisData = ref({})
+const modalVisible = ref(false);
+const modalTitle = ref(null);
+const modalWidth = ref(null);
+const modalData = ref({});
 
 //查询场站
 const getStation = () => {
@@ -217,15 +221,19 @@ const uploadCancel = () => {
 // 确认信息
 const handleConfirm = (ids, rows) => {
   console.log(ids, rows);
-  analysisVisible.value = true;
-  analysisTitle.value = "确认信息";
-  analysisWidth.value = "450px";
-  analysisData.value = rows
+  modalVisible.value = true;
+  modalTitle.value = "确认信息";
+  modalWidth.value = "450px";
+  modalData.value = rows;
 };
 
+const modalConfirm = () => {
+  modalCancel();
+  getDevstatus(stationName.value); // 查询设备态信息
+};
 // 确认信息取消
-const analysisCancel = () => {
-  analysisVisible.value = false;
+const modalCancel = () => {
+  modalVisible.value = false;
 };
 
 onMounted(() => {

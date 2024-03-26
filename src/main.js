@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import router from "./router";
 import ElementPlus from "element-plus";
-// import 'element-plus/theme-chalk/dark/css-vars.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 import DataVVue3 from "@kjgl77/datav-vue3";
 import App from "./App.vue";
 

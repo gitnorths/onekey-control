@@ -51,20 +51,6 @@ watch(
 );
 
 const menuData = reactive([
-  // {
-  //   key: "1",
-  //   name: "一次模型",
-  //   children: [
-  //     {
-  //       name: "模型导入",
-  //       path: "/model-import",
-  //     },
-  //     {
-  //       name: "模型配置",
-  //       path: "/model-configure",
-  //     },
-  //   ],
-  // },
   {
     key: "1",
     name: "模型管理",
@@ -74,10 +60,10 @@ const menuData = reactive([
     key: "2",
     name: "顺控配置",
     children: [
-      {
-        name: "顺控导入",
-        path: "/deploy-import",
-      },
+      // {
+      //   name: "顺控导入",
+      //   path: "/deploy-import",
+      // },
       {
         name: "设备态解析",
         path: "/device-state",

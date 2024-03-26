@@ -117,11 +117,10 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button :disabled="!loading" @click="handleCancel">取消</el-button>
+        <el-button @click="handleCancel">取消</el-button>
         <el-button
           type="primary"
           :loading="loading"
-          :disabled="!loading"
           @click="handleSubmit(modalFormRef)"
         >
           保存<span v-if="loading">中</span>
@@ -132,10 +131,8 @@
 </template>
 <script setup>
 import { ref, reactive } from "vue";
-// import { ElMessage, ElMessageBox } from "element-plus";
-import { mokeGet } from "@/api";
-import { forIn } from "lodash";
-import { mokePost } from "../api";
+import { mokeGet, mokePost } from "@/api";
+import { ElMessage } from "element-plus";
 
 const emits = defineEmits(["cancel", "confirm"]);
 let visible = ref();
