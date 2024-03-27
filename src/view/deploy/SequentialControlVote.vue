@@ -140,14 +140,14 @@ const getStation = () => {
       const resData = res.data[0];
       station.value = resData.oid;
       stationName.value = resData.name;
-      getDevstatus(resData.name); // 查询顺控票信息
+      getOptab(resData.name); // 查询顺控票信息
     }
   });
 };
 
-// 查询设备态信息
-const getDevstatus = (value) => {
-  mokeGet("getDevstatus", {
+// 查询顺控票信息
+const getOptab = (value) => {
+  mokeGet("getOptab", {
     station: value,
   }).then((res) => {
     if (!res?.data) return;
@@ -194,7 +194,7 @@ const handleSelectChange = (action, value) => {
           return item.oid === value;
         });
         stationName.value = obj.name;
-        getDevstatus(obj.name);
+        getOptab(obj.name);
       }
       break;
 
@@ -229,7 +229,7 @@ const handleConfirm = (ids, rows) => {
 
 const modalConfirm = () => {
   modalCancel();
-  getDevstatus(stationName.value); // 查询设备态信息
+  getOptab(stationName.value); // 查询顺控票信息
 };
 // 确认信息取消
 const modalCancel = () => {
