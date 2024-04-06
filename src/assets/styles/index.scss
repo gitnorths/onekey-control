@@ -199,9 +199,9 @@ body {
                 margin-bottom: 5px;
 
                 &:last-child {
-                    max-width   : initial;
-                    float       : right;
-                    margin-right: 0;
+                    max-width      : initial;
+                    // float       : right;
+                    margin-right   : 0;
                 }
 
                 &__label {
@@ -258,5 +258,32 @@ body {
         &__title {
             color: #ffffff;
         }
+    }
+}
+
+.el-descriptions {
+    background-color: #003b51;
+    overflow        : hidden;
+
+    &__header {
+        background-color: #00baff;
+        padding         : 12px 15px;
+    }
+
+    &__title {
+        line-height: 1;
+    }
+
+    &__body {
+        height    : 75.2vh;
+        padding   : 0 15px;
+        overflow-y: auto;
+    }
+
+    &__label {
+        display         : block;
+        background-color: #00000055;
+        padding         : 2px 10px;
+        text-align      : center;
     }
 }

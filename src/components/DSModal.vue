@@ -16,11 +16,16 @@
       :rules="modalFormRules"
       label-width="100px"
     >
-      <el-form-item label="站所" prop="station">
+      <el-form-item label="条件:">
+        {{ props.data.condition }}
+      </el-form-item>
+      <el-form-item label="站所:" prop="station">
         <el-select
           v-model="modalForm.station"
           placeholder="请选择站所"
           style="width: 100%"
+          filterable
+          @change="handleSelectChange('station', $event)"
         >
           <el-option
             v-for="item in stationOptions"
@@ -30,11 +35,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="电压等级" prop="voltage">
+      <el-form-item label="电压等级:" prop="voltage">
         <el-select
           v-model="modalForm.voltage"
           placeholder="请选择电压等级"
           style="width: 100%"
+          filterable
+          @change="handleSelectChange('voltage', $event)"
         >
           <el-option
             v-for="item in voltageOptions"
@@ -44,11 +51,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="间隔" prop="bay">
+      <el-form-item label="间隔:" prop="bay">
         <el-select
           v-model="modalForm.bay"
           placeholder="请选择间隔"
           style="width: 100%"
+          filterable
+          @change="handleSelectChange('bay', $event)"
         >
           <el-option
             v-for="item in bayOptions"
@@ -58,11 +67,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="设备" prop="dev">
+      <el-form-item label="设备:" prop="dev">
         <el-select
           v-model="modalForm.dev"
           placeholder="请选择设备"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in devOptions"
@@ -72,11 +82,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="类型" prop="pType">
+      <el-form-item label="类型:" prop="pType">
         <el-select
           v-model="modalForm.pType"
           placeholder="请选择类型"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in pTypeOptions"
@@ -86,11 +97,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="操作符" prop="operate">
+      <el-form-item label="操作符:" prop="operate">
         <el-select
           v-model="modalForm.operate"
           placeholder="请选择操作符"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in operateOptions"
@@ -100,11 +112,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="刀闸状态" prop="devStatus">
+      <el-form-item label="刀闸状态:" prop="devStatus">
         <el-select
           v-model="modalForm.devStatus"
           placeholder="请选择刀闸状态"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in devStatusOptions"
@@ -133,6 +146,7 @@
 import { ref, reactive } from "vue";
 import { mokeGet, mokePost } from "@/api";
 import { ElMessage } from "element-plus";
+import { filter } from "lodash";
 
 const emits = defineEmits(["cancel", "confirm"]);
 let visible = ref();
@@ -251,13 +265,14 @@ const confirmDevStatus = async () => {
 // 查询模型映射信息
 const getModelMap = async () => {
   const { data } = await mokeGet("getModelMap");
+
   // 站所
-  stationOptions.value = findMapKey(
-    "station",
-    data.station,
-    props.data.station,
-    props.data.station
-  );
+  stationOptions.value = mapKey("station", data.station);
+  const stationArr = filter(stationOptions.value, {
+    name: props.data.station,
+  });
+  modalForm.station = stationArr[0].oid;
+
   // 电压等级
   voltageOptions.value = findMapKey(
     "voltage",
@@ -265,6 +280,9 @@ const getModelMap = async () => {
     props.data.station,
     props.data.voltage
   );
+  modalForm.voltage = filter(voltageOptions.value, {
+    name: props.data.station + "/" + props.data.voltage,
+  })[0].oid;
   // 间隔
   bayOptions.value = findMapKey(
     "bay",
@@ -272,6 +290,9 @@ const getModelMap = async () => {
     props.data.station + "/" + props.data.voltage,
     props.data.bay
   );
+  modalForm.bay = filter(bayOptions.value, {
+    name: props.data.station + "/" + props.data.voltage + "/" + props.data.bay,
+  })[0].oid;
   // 设备
   devOptions.value = findMapKey(
     "dev",
@@ -279,6 +300,16 @@ const getModelMap = async () => {
     props.data.station + "/" + props.data.voltage + "/" + props.data.bay,
     props.data.dev
   );
+  modalForm.dev = filter(devOptions.value, {
+    name:
+      props.data.station +
+      "/" +
+      props.data.voltage +
+      "/" +
+      props.data.bay +
+      "/" +
+      props.data.dev,
+  })[0].oid;
 };
 
 // 获取设备态配置映射信息
@@ -299,7 +330,13 @@ const getDevStatusMap = async () => {
   });
 };
 
-// 模型键值对数据转换
+/**
+ * 模型键值对数据转换
+ * type 层级类型
+ * object 层级值集合
+ * name 当前层级全路径名称
+ * curName 当前层级名称
+ **/
 const findMapKey = (type, object, name, curName) => {
   let arr = [];
   for (const key in object) {
@@ -315,7 +352,12 @@ const findMapKey = (type, object, name, curName) => {
   return arr;
 };
 
-// 键值对转换
+/**
+ * 键值对转换
+ * type 层级类型
+ * object 层级值集合
+ * names 当前层级名称
+ *  */
 const mapKey = (type, object, names) => {
   let arr = [];
   for (const key in object) {
@@ -327,6 +369,149 @@ const mapKey = (type, object, names) => {
     if (key === names) modalForm[type] = object[key];
   }
   return arr;
+};
+
+// 监听select变化
+const handleSelectChange = async (action, value) => {
+  const { data: dataMap } = await mokeGet("getModelMap");
+  switch (action) {
+    case "station":
+      {
+        modalForm.voltage = null;
+        voltageOptions.value = [];
+
+        modalForm.bay = null;
+        bayOptions.value = [];
+
+        modalForm.dev = null;
+        devOptions.value = [];
+
+        if (value) {
+          // 电压等级
+          const obj = stationOptions.value.find((item) => {
+            return item.oid === value;
+          });
+          voltageOptions.value = findMapKey(
+            "voltage",
+            dataMap.volLevel,
+            obj.name,
+            props.data.voltage
+          );
+        }
+      }
+      break;
+    case "voltage":
+      {
+        modalForm.bay = null;
+        bayOptions.value = [];
+
+        modalForm.dev = null;
+        devOptions.value = [];
+
+        if (value) {
+          // 查询间隔
+          const obj = voltageOptions.value.find((item) => {
+            return item.oid === value;
+          });
+          bayOptions.value = findMapKey(
+            "bay",
+            dataMap.bay,
+            obj.name,
+            props.data.bay
+          );
+        }
+      }
+
+      break;
+    case "bay":
+      {
+        modalForm.dev = null;
+        devOptions.value = [];
+
+        if (value) {
+          const obj = bayOptions.value.find((item) => {
+            return item.oid === value;
+          });
+
+          devOptions.value = findMapKey(
+            "dev",
+            dataMap.switchMap,
+            obj.name,
+            props.data.dev
+          );
+        }
+      }
+
+      break;
+
+    default:
+      break;
+  }
+};
+
+//查询场站
+const getStation = () => {
+  mokeGet("getStation").then((res) => {
+    if (res.data.length > 0) {
+      stationOptions.value = res.data.map((item) => {
+        return {
+          ...item,
+          label: item.name,
+          value: item.oid,
+        };
+      });
+
+      const resData = res.data[0];
+      station.value = resData.oid;
+      stationName.value = resData.name;
+      handleDevStatusByCondition(0, "/" + stationName.value, station.value); // 查询设备态信息
+    }
+  });
+};
+
+// 查询电压等级
+const getVoltage = (oid) => {
+  mokeGet("getVoltage", { oid }).then((res) => {
+    if (res.data.length > 0) {
+      voltageOptions.value = res.data.map((item) => {
+        return {
+          ...item,
+          label: item.name,
+          value: item.oid,
+        };
+      });
+    }
+  });
+};
+
+// 查询间隔
+const getBays = (oid) => {
+  mokeGet("getBay", { oid }).then((res) => {
+    if (res.data.length > 0) {
+      bayOptions.value = res.data.map((item) => {
+        return {
+          ...item,
+          label: item.name,
+          value: item.oid,
+        };
+      });
+    }
+  });
+};
+
+// 查询设备态信息
+const handleDevStatusByCondition = async (type, path, oid) => {
+  tableLoad.value = true;
+  const { data } = await mokeGet("getDevStatusByCondition", {
+    type,
+    path,
+    oid,
+  });
+
+  tableData.value = [];
+  if (!data?.length) return (tableLoad.value = false);
+  tableData.value = data;
+  tableLoad.value = false;
 };
 </script>
 <style lang="scss" scoped></style>

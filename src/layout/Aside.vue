@@ -5,6 +5,7 @@
         <el-menu
           router
           :default-active="defaultActive"
+          unique-opened
           class="el-menu-vertical-demo"
         >
           <template v-for="(item, i) in menuData" :key="i">
@@ -54,28 +55,48 @@ const menuData = reactive([
   {
     key: "1",
     name: "模型管理",
-    path: "/model",
+    // path: "/model",
+    children: [
+      {
+        name: "导入",
+        path: "/model/import",
+      },
+      {
+        name: "查询结果",
+        path: "/model/list",
+      },
+    ],
   },
   {
     key: "2",
-    name: "顺控配置",
+    name: "设备态管理",
     children: [
-      // {
-      //   name: "顺控导入",
-      //   path: "/deploy-import",
-      // },
       {
-        name: "设备态解析",
-        path: "/device-state",
+        name: "导入",
+        path: "/device/import",
       },
       {
-        name: "顺控票解析",
-        path: "/sequential-control-vote",
+        name: "查询结果",
+        path: "/device/list",
       },
     ],
   },
   {
     key: "3",
+    name: "顺控票管理",
+    children: [
+      {
+        name: "导入",
+        path: "/control/import",
+      },
+      {
+        name: "查询结果",
+        path: "/control/list",
+      },
+    ],
+  },
+  {
+    key: "4",
     name: "配置管理",
     path: "/setting",
   },

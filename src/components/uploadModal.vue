@@ -88,7 +88,7 @@ const handleSuccess = (res) => {
       message: "上传成功！",
       type: "success",
     });
-    handleUploadCancel();
+    emits("confirm", res.data);
   } else {
     ElMessage.error(res.desc);
   }

@@ -7,6 +7,7 @@
             v-model="station"
             placeholder="请选择"
             clearable
+            filterable
             @change="handleSelectChange('station', $event)"
           >
             <el-option
@@ -22,6 +23,7 @@
             v-model="voltage"
             placeholder="请选择"
             clearable
+            filterable
             @change="handleSelectChange('voltage', $event)"
           >
             <el-option
@@ -37,6 +39,7 @@
             v-model="bay"
             placeholder="请选择"
             clearable
+            filterable
             @change="handleSelectChange('bay', $event)"
           >
             <el-option
@@ -62,9 +65,6 @@
             />
           </el-select>
         </el-form-item> -->
-        <el-form-item>
-          <el-button type="primary" @click="onModalImport">模型导入</el-button>
-        </el-form-item>
       </el-form>
     </div>
     <div class="oc-box__main">
@@ -83,11 +83,16 @@
             :align="item.align ? item.align : null"
           >
             <template #default="scope">
+              <el-link type="warning" @click="handleOperator(scope.row, 1)">
+                绑定
+              </el-link>
+              &nbsp;
               <el-link
-                :type="scope.row.digitals.length > 0 ? 'danger' : 'warning'"
-                @click="handleOperator(scope.row)"
+                v-if="scope.row.digitals.length > 0"
+                type="danger"
+                @click="handleOperator(scope.row, 2)"
               >
-                {{ scope.row.digitals.length > 0 ? "取消" : "" }}绑定
+                解绑
               </el-link>
             </template>
           </el-table-column>
@@ -101,15 +106,6 @@
         </template>
       </el-table>
     </div>
-    <!-- 模型导入 START-->
-    <UploadModal
-      v-model="uploadVisible"
-      :title="uploadTitle"
-      :width="uploadWidth"
-      :url="uploadUrl"
-      @cancel="uploadCancel"
-    ></UploadModal>
-    <!-- 模型导入 END-->
     <!-- SCD导入模型关联 START -->
     <ConditionModal
       v-model="conditionVisible"
@@ -129,7 +125,6 @@ import { mokeGet, mokePost } from "@/api";
 import { baseUrl } from "@/config";
 import { map } from "lodash";
 import { ElMessage, ElMessageBox } from "element-plus";
-import UploadModal from "@/components/UploadModal.vue";
 import ConditionModal from "./components/condition.vue";
 
 const station = ref(null);
@@ -156,12 +151,6 @@ const tableColumns = ref([
   { prop: "operator", label: "操作", width: "200px", align: "center" },
 ]);
 
-// 导入信息
-const uploadVisible = ref(false);
-const uploadTitle = ref(null);
-const uploadWidth = ref(null);
-const uploadUrl = ref(null);
-
 // 绑定信息
 const conditionVisible = ref(false);
 const conditionTitle = ref(null);
@@ -181,7 +170,7 @@ const getStation = () => {
         };
       });
 
-      const resData = res.data[0];
+      const resData = res.data[1];
       station.value = resData.oid;
       stationName.value = resData.name;
       // getDigtal(resData.name, resData.oid); // 查询信号
@@ -396,20 +385,6 @@ const handleSelectChange = (action, value) => {
   }
 };
 
-const onModalImport = () => {
-  if (!uploadVisible.value) {
-    uploadVisible.value = !uploadVisible.value;
-    uploadTitle.value = "一次模型导入";
-    uploadWidth.value = "600px";
-    uploadUrl.value = baseUrl + "/uploadModel";
-  }
-};
-
-// 上传取消
-const uploadCancel = () => {
-  uploadVisible.value = false;
-};
-
 // 查询刀闸信息列表
 const getSwitchByCondition = async (type, path, oid) => {
   loading.value = true;
@@ -423,7 +398,6 @@ const getSwitchByCondition = async (type, path, oid) => {
   if (!data?.length) return (loading.value = false);
   let arrs = [];
   data.forEach((item, i) => {
-    console.log("map", map(item.digitals, "name").toString());
     arrs.push({
       ...item,
       index: i + 1,
@@ -439,8 +413,8 @@ const getSwitchByCondition = async (type, path, oid) => {
 };
 
 // 绑定操作
-const handleOperator = async (row) => {
-  if (row.digitals.length > 0) {
+const handleOperator = async (row, type) => {
+  if (row.digitals.length > 0 && type == 2) {
     ElMessageBox.confirm(`确定取消 ${row.oid} 的当前关联?`, "Warning", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
@@ -462,7 +436,8 @@ const handleOperator = async (row) => {
         }
       })
       .catch(() => {});
-  } else {
+  }
+  if (type == 1) {
     conditionVisible.value = !conditionVisible.value;
     conditionTitle.value = "绑定信息";
     conditionWidth.value = "600px";

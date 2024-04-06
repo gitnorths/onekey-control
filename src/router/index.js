@@ -14,27 +14,51 @@ const routes = [
     },
   },
   {
-    name: "DeployImport",
-    path: "/deploy-import",
-    component: () => import("@/view/deploy/Import.vue"),
+    name: "ModelImport",
+    path: "/model/import",
+    component: () => import("@/view/model/import.vue"),
     meta: {
-      title: "顺控导入",
+      title: "模型导入",
     },
   },
   {
-    name: "DeviceState",
-    path: "/device-state",
-    component: () => import("@/view/deploy/DeviceState.vue"),
+    name: "ModelList",
+    path: "/model/list",
+    component: () => import("@/view/model/list.vue"),
     meta: {
-      title: "设备态解析",
+      title: "模型列表",
     },
   },
   {
-    name: "SequentialControlVote",
-    path: "/sequential-control-vote",
-    component: () => import("@/view/deploy/SequentialControlVote.vue"),
+    name: "DeviceImport",
+    path: "/device/import",
+    component: () => import("@/view/device/import.vue"),
     meta: {
-      title: "顺控票解析",
+      title: "设备态导入",
+    },
+  },
+  {
+    name: "DeviceList",
+    path: "/device/list",
+    component: () => import("@/view/device/list.vue"),
+    meta: {
+      title: "设备态列表",
+    },
+  },
+  {
+    name: "ControlImport",
+    path: "/control/import",
+    component: () => import("@/view/control/import.vue"),
+    meta: {
+      title: "顺控票导入",
+    },
+  },
+  {
+    name: "ControlList",
+    path: "/control/list",
+    component: () => import("@/view/control/list.vue"),
+    meta: {
+      title: "顺控票列表",
     },
   },
   {

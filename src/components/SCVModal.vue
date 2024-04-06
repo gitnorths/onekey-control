@@ -21,6 +21,7 @@
           v-model="modalForm.station"
           placeholder="请选择站所"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in stationOptions"
@@ -35,6 +36,7 @@
           v-model="modalForm.voltage"
           placeholder="请选择电压等级"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in voltageOptions"
@@ -49,6 +51,7 @@
           v-model="modalForm.bay"
           placeholder="请选择间隔"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in bayOptions"
@@ -63,6 +66,7 @@
           v-model="modalForm.dev"
           placeholder="请选择设备"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in devOptions"
@@ -77,6 +81,7 @@
           v-model="modalForm.pType"
           placeholder="请选择类型"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in pTypeOptions"
@@ -91,6 +96,7 @@
           v-model="modalForm.operate"
           placeholder="请选择操作符"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in operateOptions"
@@ -105,6 +111,7 @@
           v-model="modalForm.devStatus"
           placeholder="请选择刀闸状态"
           style="width: 100%"
+          filterable
         >
           <el-option
             v-for="item in devStatusOptions"

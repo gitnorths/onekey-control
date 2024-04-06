@@ -7,6 +7,7 @@
             v-model="station"
             placeholder="请选择"
             clearable
+            filterable
             @change="handleSelectChange('station', $event)"
           >
             <el-option
@@ -27,43 +28,29 @@
     <div class="oc-box__main">
       <div class="device-state__text" v-if="false">
         <dv-decoration-11 style="width: 500px; height: 60px">
-          <el-text size="large">{{ stationName }}-顺控票解析结果</el-text>
+          <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
       </div>
-      <div v-if="!tableData.length" class="oc-empty">
+      <!-- <div v-if="!tableData.length" class="oc-empty">
         <el-empty description="暂无数据" />
-      </div>
+      </div> -->
       <el-table
-        v-else
         :data="tableData"
         :span-method="objectSpanMethod"
+        v-loading="tableLoad"
         class="oc-table"
         stripe
         style="width: 100%"
       >
         <template v-for="(item, i) in tableColumn" :key="i">
           <el-table-column
-            v-if="item.prop != 'operator'"
+            v-if="item.prop == 'operator'"
             :prop="item.prop"
             :label="item.label"
             :width="item.width ? item.width : null"
             :align="item.align ? item.align : null"
-          />
-          <el-table-column
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-            v-else
           >
             <template #default="scope">
-              <!-- <el-button
-                type="warning"
-                size="small"
-                @click="handleEdit(scope.$index, scope.row)"
-              >
-                修正
-              </el-button> -->
               <el-button
                 type="warning"
                 size="small"
@@ -73,6 +60,13 @@
               </el-button>
             </template>
           </el-table-column>
+          <el-table-column
+            v-else
+            :prop="item.prop"
+            :label="item.label"
+            :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null"
+          />
         </template>
       </el-table>
     </div>
@@ -81,29 +75,36 @@
       :title="uploadTitle"
       :width="uploadWidth"
       :url="uploadUrl"
+      @confirm="uploadConfirm"
       @cancel="uploadCancel"
     ></UploadModal>
-    <SCVModal
+    <DSModal
       v-model="modalVisible"
       :title="modalTitle"
       :width="modalWidth"
       :data="modalData"
       @confirm="modalConfirm"
       @cancel="modalCancel"
-    ></SCVModal>
+    ></DSModal>
   </div>
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
 import { mokeGet } from "@/api";
 import { baseUrl } from "@/config";
+import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
 import UploadModal from "@/components/UploadModal.vue";
-import SCVModal from "@/components/SCVModal.vue";
+import DSModal from "@/components/DSModal.vue";
+
+const router = useRouter();
 
 const station = ref(null);
 const stationName = ref(null);
 const stationOptions = ref([]);
 
+const tableLoad = ref(true);
+const tableData = ref([]);
 const tableColumn = ref([
   { prop: "index", label: "序号", width: "80px", align: "center" },
   { prop: "state", label: "状态" },
@@ -111,7 +112,6 @@ const tableColumn = ref([
   { prop: "parseResults", label: "解析结果" },
   { prop: "operator", label: "操作", width: "150px", align: "center" },
 ]);
-const tableData = ref([]);
 
 // 导入信息
 const uploadVisible = ref(false);
@@ -137,20 +137,22 @@ const getStation = () => {
         };
       });
 
-      const resData = res.data[0];
+      const resData = res.data[1];
       station.value = resData.oid;
       stationName.value = resData.name;
-      getOptab(resData.name); // 查询顺控票信息
+      tableLoad.value = false;
+      // getDevstatus(resData.name); // 查询设备态信息
     }
   });
 };
 
-// 查询顺控票信息
-const getOptab = (value) => {
-  mokeGet("getOptab", {
+// 查询设备态信息
+const getDevstatus = (value) => {
+  tableLoad.value = true;
+  mokeGet("getDevstatus", {
     station: value,
   }).then((res) => {
-    if (!res?.data) return;
+    if (!res?.data) return (tableLoad.value = false);
     tableData.value = [];
     const arr = [];
     for (let i = 0; i < res.data.length; i++) {
@@ -174,14 +176,7 @@ const getOptab = (value) => {
     // 给列表赋值
     const colFields = ["index", "state"];
     setTableRowSpan(tableData.value, colFields);
-    // tableData.value = [
-    //   {
-    //     index: "1",
-    //     state: "运行状态",
-    //     condition: "220kV梧220开关在“合位”",
-    //     parseResults: "220kV/梧220/开关/在/“/合位/”",
-    //   },
-    // ];
+    tableLoad.value = false;
   });
 };
 
@@ -194,7 +189,7 @@ const handleSelectChange = (action, value) => {
           return item.oid === value;
         });
         stationName.value = obj.name;
-        getOptab(obj.name);
+        getDevstatus(obj.name);
       }
       break;
 
@@ -205,12 +200,38 @@ const handleSelectChange = (action, value) => {
 
 // 导入
 const onModalImport = () => {
-  if (!uploadVisible.value) {
-    uploadVisible.value = !uploadVisible.value;
-    uploadTitle.value = "顺控票模型导入";
-    uploadWidth.value = "550px";
-    uploadUrl.value = baseUrl + "/uploadOptabInfo";
-  }
+  ElMessageBox.confirm("导入前，请确认配置是否完善?", "Warning", {
+    confirmButtonText: "继续导入",
+    cancelButtonText: "去配置",
+    closeOnPressEscape: false, //按下 ESC 键关闭弹窗
+    closeOnClickModal: false, //点击遮罩关闭弹窗
+    distinguishCancelAndClose: true, //区分取消与关闭
+    type: "warning",
+    title: "提示信息",
+  })
+    .then(() => {
+      if (!uploadVisible.value) {
+        uploadVisible.value = !uploadVisible.value;
+        uploadTitle.value = "顺控票模型导入";
+        uploadWidth.value = "550px";
+        uploadUrl.value = baseUrl + "/uploadOptabInfo";
+      }
+    })
+    .catch((action) => {
+      if (action == "cancel") {
+        router.push({ path: "/setting" });
+      }
+    });
+};
+
+// 导入确定
+const uploadConfirm = (data) => {
+  uploadVisible.value = false;
+  const obj = stationOptions.value.find((item) => {
+    return item.name === data[0].station;
+  });
+  station.value = obj.oid;
+  getDevstatus(data[0].station); // 查询设备态信息
 };
 
 // 导入取消
@@ -229,7 +250,7 @@ const handleConfirm = (ids, rows) => {
 
 const modalConfirm = () => {
   modalCancel();
-  getOptab(stationName.value); // 查询顺控票信息
+  getDevstatus(stationName.value); // 查询设备态信息
 };
 // 确认信息取消
 const modalCancel = () => {
