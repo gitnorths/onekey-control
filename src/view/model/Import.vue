@@ -29,8 +29,9 @@
         <el-table
           :data="tableData"
           :span-method="objectSpanMethod"
-          empty-text="暂无数据"
           v-loading="tableload"
+          stripe
+          empty-text="暂无数据"
           class="oc-table"
         >
           <template v-for="(item, i) in tableColumns" :key="i">

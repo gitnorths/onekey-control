@@ -78,14 +78,14 @@
       @confirm="uploadConfirm"
       @cancel="uploadCancel"
     ></UploadModal>
-    <DSModal
+    <DevStatusModal
       v-model="modalVisible"
       :title="modalTitle"
       :width="modalWidth"
       :data="modalData"
       @confirm="modalConfirm"
       @cancel="modalCancel"
-    ></DSModal>
+    ></DevStatusModal>
   </div>
 </template>
 <script setup>
@@ -95,7 +95,7 @@ import { baseUrl } from "@/config";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import UploadModal from "@/components/UploadModal.vue";
-import DSModal from "@/components/DSModal.vue";
+import DevStatusModal from "@/components/DevStatusModal.vue";
 
 const router = useRouter();
 
@@ -166,13 +166,14 @@ const getDevstatus = (value) => {
             condition:
               item.voltage + item.bay + item.dev + item.operate + item.yxValue,
             parseResults: `${item.voltage}/${item.bay}/${item.dev}/${item.operate}/${item.yxValue}`,
+            operator: dataMap.status,
           });
         });
       }
     }
 
     // 给列表赋值
-    const colFields = ["index", "state"];
+    const colFields = ["index", "state", "operator"];
     setTableRowSpan(tableData.value, colFields);
     tableLoad.value = false;
   });
@@ -242,7 +243,7 @@ const handleConfirm = (ids, rows) => {
   console.log(ids, rows);
   modalVisible.value = true;
   modalTitle.value = "确认信息";
-  modalWidth.value = "650px";
+  modalWidth.value = "80%";
   modalData.value = rows;
 };
 
