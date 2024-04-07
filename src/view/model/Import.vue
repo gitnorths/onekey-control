@@ -6,6 +6,7 @@
           <el-select
             v-model="station"
             placeholder="请选择"
+            no-data-text="暂无数据"
             clearable
             filterable
             @change="handleSelectChange('station', $event)"
@@ -24,43 +25,37 @@
       </el-form>
     </div>
     <div class="oc-box__main">
-      <el-row :gutter="20">
-        <el-col :span="18">
-          <el-table
-            :data="tableData"
-            :span-method="objectSpanMethod"
-            v-loading="tableload"
-            height="75vh"
-            style="width: 100%"
+      <div class="oc-box__left">
+        <el-table
+          :data="tableData"
+          :span-method="objectSpanMethod"
+          empty-text="暂无数据"
+          v-loading="tableload"
+          class="oc-table"
+        >
+          <template v-for="(item, i) in tableColumns" :key="i">
+            <el-table-column
+              :prop="item.prop"
+              :label="item.label"
+              :width="item.width ? item.width : null"
+              :align="item.align ? item.align : null"
+            />
+          </template>
+        </el-table>
+      </div>
+      <div class="oc-box__right">
+        <el-descriptions title="导入结果详情" :column="1">
+          <el-descriptions-item
+            v-for="item in modelInfo"
+            :key="item.name"
+            :label="item.name"
           >
-            <template v-for="(item, i) in tableColumns" :key="i">
-              <el-table-column
-                :prop="item.prop"
-                :label="item.label"
-                :width="item.width ? item.width : null"
-                :align="item.align ? item.align : null"
-              />
-            </template>
-          </el-table>
-        </el-col>
-        <el-col :span="6">
-          <el-descriptions
-            v-if="modelInfo.length"
-            title="导入结果详情"
-            :column="1"
-          >
-            <el-descriptions-item
-              v-for="item in modelInfo"
-              :key="item.name"
-              :label="item.name"
-            >
-              <p v-for="itemData in item.data" :key="itemData">
-                {{ itemData }}
-              </p>
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-col>
-      </el-row>
+            <p v-for="itemData in item.data" :key="itemData">
+              {{ itemData }}
+            </p>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
     </div>
     <!-- 模型导入 START-->
     <UploadModal
@@ -85,16 +80,10 @@ const station = ref(null);
 const stationName = ref(null);
 const stationOptions = ref([]);
 
+// 表格参数
 const tableload = ref(true);
 const tableData = ref([]);
-const tableColumns = ref([
-  // { prop: "index", label: "序号", width: "80px", align: "center" },
-  // { prop: "path", label: "路径" },
-  // { prop: "name", label: "名称", width: "150px" },
-  // { prop: "oid", label: "OID", width: "120px" },
-  // { prop: "digitalsName", label: "关联信号", align: "center" },
-  // { prop: "operator", label: "操作", width: "200px", align: "center" },
-]);
+const tableColumns = ref([]);
 
 // 说明详情
 const modelInfo = ref([]);
@@ -106,23 +95,29 @@ const uploadWidth = ref(null);
 const uploadUrl = ref(null);
 
 //查询场站
-const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
+const getStation = async () => {
+  // const res = await mokeGet("getStation");
+  mokeGet("getStation")
+    .then((res) => {
+      if (res.data.length > 0) {
+        stationOptions.value = res.data.map((item) => {
+          return {
+            ...item,
+            label: item.name,
+            value: item.oid,
+          };
+        });
 
-      const resData = res.data[1];
-      station.value = resData.oid;
-      stationName.value = resData.name;
-      getModelInfo(stationName.value); // 查询刀闸列表
-    }
-  });
+        const resData = res.data[1];
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        getModelInfo(stationName.value); // 查询刀闸列表
+      }
+    })
+    .catch((error) => {
+      const { status } = error.response;
+      if (status == 500) tableload.value = false;
+    });
 };
 
 // 查询模型解析结果
@@ -265,3 +260,5 @@ onMounted(() => {
   getStation();
 });
 </script>
+<style lang="scss" scoped>
+</style>
