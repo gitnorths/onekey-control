@@ -19,9 +19,12 @@ html.dark {
     --vxe-table-border-color                : #155093;
     --vxe-table-row-striped-background-color: #0a2732;
 
-    --vxe-modal-header-background-color: #0a2732;
-    --vxe-modal-body-background-color  : #003b51;
-    --vxe-modal-border-color           : #003b51;
+    --vxe-modal-header-background-color       : #0a2732;
+    --vxe-modal-body-background-color         : #003b51;
+    --vxe-modal-border-color                  : #003b51;
+    --vxe-select-panel-background-color       : #0a2732;
+    --vxe-select-option-hover-background-color: #003b51;
+    --vxe-table-popup-border-color            : #155093;
 
     .el-table {
         --el-table-header-bg-color  : #00baff;
@@ -321,4 +324,9 @@ body {
         padding         : 2px 10px;
         text-align      : center;
     }
+}
+
+
+.vxe-select--panel {
+    z-index: 9997 !important;
 }

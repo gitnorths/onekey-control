@@ -6,7 +6,9 @@
           <el-select
             v-model="station"
             placeholder="请选择"
+            no-data-text="暂无数据"
             clearable
+            filterable
             @change="handleSelectChange('station', $event)"
           >
             <el-option
@@ -17,89 +19,44 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="电压等级">
-          <el-select
-            v-model="voltage"
-            placeholder="请选择"
-            clearable
-            @change="handleSelectChange('voltage', $event)"
-          >
-            <el-option
-              v-for="item in voltageOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="间隔">
-          <el-select
-            v-model="bay"
-            placeholder="请选择"
-            clearable
-            @change="handleSelectChange('bay', $event)"
-          >
-            <el-option
-              v-for="item in bayOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
-          </el-select>
-        </el-form-item>
-        <!-- <el-form-item label="设备">
-          <el-select
-            v-model="device"
-            placeholder="请选择"
-            clearable
-            @change="handleSelectChange('device', $event)"
-          >
-            <el-option
-              v-for="item in deviceOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
-          </el-select>
-        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="onModalImport">模型导入</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="oc-box__main">
-      <el-table
-        :data="tableData"
-        v-loading="loading"
-        height="75vh"
-        style="width: 100%"
-      >
-        <template v-for="(item, i) in tableColumns" :key="i">
-          <el-table-column
-            v-if="item.prop == 'operator'"
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
+      <div class="oc-box__left">
+        <el-table
+          :data="tableData"
+          :span-method="objectSpanMethod"
+          v-loading="tableload"
+          stripe
+          empty-text="暂无数据"
+          class="oc-table"
+        >
+          <template v-for="(item, i) in tableColumns" :key="i">
+            <el-table-column
+              :prop="item.prop"
+              :label="item.label"
+              :width="item.width ? item.width : null"
+              :align="item.align ? item.align : null"
+            />
+          </template>
+        </el-table>
+      </div>
+      <div class="oc-box__right">
+        <el-descriptions title="导入结果详情" :column="1">
+          <el-descriptions-item
+            v-for="item in modelInfo"
+            :key="item.name"
+            :label="item.name"
           >
-            <template #default="scope">
-              <el-link
-                :type="scope.row.digitals.length > 0 ? 'danger' : 'warning'"
-                @click="handleOperator(scope.row)"
-              >
-                {{ scope.row.digitals.length > 0 ? "取消" : "" }}绑定
-              </el-link>
-            </template>
-          </el-table-column>
-          <el-table-column
-            v-else
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          />
-        </template>
-      </el-table>
+            <p v-for="itemData in item.data" :key="itemData">
+              {{ itemData }}
+            </p>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
     </div>
     <!-- 模型导入 START-->
     <UploadModal
@@ -107,54 +64,30 @@
       :title="uploadTitle"
       :width="uploadWidth"
       :url="uploadUrl"
+      @confirm="uploadConfirm"
       @cancel="uploadCancel"
     ></UploadModal>
     <!-- 模型导入 END-->
-    <!-- SCD导入模型关联 START -->
-    <ConditionModal
-      v-model="conditionVisible"
-      :title="conditionTitle"
-      :width="conditionWidth"
-      :data="conditionData"
-      :station="conditionStation"
-      @confirm="onConditionConfirm"
-      @cancel="onConditionCancel"
-    ></ConditionModal>
-    <!-- SCD导入模型关联 END -->
   </div>
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
 import { mokeGet, mokePost } from "@/api";
 import { baseUrl } from "@/config";
-import { map } from "lodash";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { map, toArray } from "lodash";
 import UploadModal from "@/components/UploadModal.vue";
-import ConditionModal from "./components/condition.vue";
 
 const station = ref(null);
 const stationName = ref(null);
 const stationOptions = ref([]);
-const voltage = ref(null);
-const voltageName = ref(null);
-const voltageOptions = ref([]);
-const bay = ref(null);
-const bayName = ref(null);
-const bayOptions = ref([]);
-const device = ref(null);
-const deviceName = ref(null);
-const deviceOptions = ref([]);
 
-const loading = ref(true);
+// 表格参数
+const tableload = ref(true);
 const tableData = ref([]);
-const tableColumns = ref([
-  { prop: "index", label: "序号", width: "80px", align: "center" },
-  { prop: "path", label: "路径" },
-  { prop: "name", label: "名称", width: "150px" },
-  { prop: "oid", label: "OID", width: "120px" },
-  { prop: "digitalsName", label: "关联信号", align: "center" },
-  { prop: "operator", label: "操作", width: "200px", align: "center" },
-]);
+const tableColumns = ref([]);
+
+// 说明详情
+const modelInfo = ref([]);
 
 // 导入信息
 const uploadVisible = ref(false);
@@ -162,122 +95,82 @@ const uploadTitle = ref(null);
 const uploadWidth = ref(null);
 const uploadUrl = ref(null);
 
-// 绑定信息
-const conditionVisible = ref(false);
-const conditionTitle = ref(null);
-const conditionWidth = ref(null);
-const conditionData = ref(null);
-const conditionStation = ref(null);
-
 //查询场站
-const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
-
-      const resData = res.data[0];
-      station.value = resData.oid;
-      stationName.value = resData.name;
-      // getDigtal(resData.name, resData.oid); // 查询信号
-      getVoltage(station.value); // 查询电压等级
-      getSwitchByCondition(0, "/" + stationName.value, station.value); // 查询刀闸列表
-    }
-  });
-};
-
-// 查询电压等级
-const getVoltage = (oid) => {
-  mokeGet("getVoltage", { oid }).then((res) => {
-    if (res.data.length > 0) {
-      voltageOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
-    }
-  });
-};
-
-// 查询间隔
-const getBays = (oid) => {
-  mokeGet("getBay", { oid }).then((res) => {
-    if (res.data.length > 0) {
-      bayOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
-    }
-  });
-};
-
-// 查询设备
-const getDevice = (oid) => {
-  mokeGet("getSwitch", { oid }).then((res) => {
-    if (res.data.length > 0) {
-      deviceOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
-    }
-  });
-};
-
-// 查询信号
-const getDigtal = (name, oid) => {
-  mokeGet("getDigtal", {
-    appName: name,
-    breakOid: oid,
-  })
+const getStation = async () => {
+  // const res = await mokeGet("getStation");
+  mokeGet("getStation")
     .then((res) => {
-      if (!res?.data) return;
-      tableData.value = [];
       if (res.data.length > 0) {
-        tableData.value = res.data.map((item, i) => {
+        stationOptions.value = res.data.map((item) => {
           return {
             ...item,
-            index: i + 1,
+            label: item.name,
+            value: item.oid,
           };
         });
+
+        const resData = res.data[1];
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        getModelInfo(stationName.value); // 查询刀闸列表
       }
     })
     .catch((error) => {
-      console.error("获取信息出错：", error);
+      const { status } = error.response;
+      if (status == 500) tableload.value = false;
     });
 };
 
 // 查询模型解析结果
-const getModelInfo = (value) => {
-  mokeGet("getModelInfo", {
+const getModelInfo = async (value) => {
+  tableload.value = true;
+  const { data } = await mokeGet("getModelInfo", {
     station: value,
-  }).then((res) => {
-    tableColumns.value = [];
-    tableData.value = [];
-    if (!res?.data) return;
-    const resData = res.data[0][value];
-    const column = resData[0]; // 表头
+  });
+
+  if (!data?.length) return (tableload.value = false);
+  const dataInfo = data[0][value];
+  const dataT = dataInfo.data; // 表格数据
+  const dataD = dataInfo.desc; // 说明数据
+  tableload.value = false;
+  tableColumns.value = [];
+  modelInfo.value = [];
+
+  if (dataT?.length) {
+    const column = dataT[0]; // 表头
     for (const key in column) {
       if (Object.hasOwnProperty.call(column, key)) {
         const name = column[key];
         tableColumns.value.push({ prop: key, label: name });
       }
     }
-    resData.shift(); // 删除数组第一项
-    tableData.value = resData;
-  });
+    dataT.shift(); // 删除数组第一项
+    tableData.value = dataT;
+
+    // 给列表赋值
+    const colFields = ["station", "volatage", "interval"];
+    setTableRowSpan(tableData.value, colFields);
+  }
+
+  if (dataD) {
+    for (const key in dataD) {
+      if (Object.hasOwnProperty.call(dataD, key)) {
+        modelInfo.value.push({
+          name:
+            key === "station"
+              ? "站所"
+              : key === "voltage"
+              ? "电压等级"
+              : key === "bay"
+              ? "间隔"
+              : key === "switch"
+              ? "设备"
+              : "",
+          data: toArray(dataD[key]),
+        });
+      }
+    }
+  }
 };
 
 // 监听select变化
@@ -285,112 +178,18 @@ const handleSelectChange = (action, value) => {
   switch (action) {
     case "station":
       {
-        voltage.value = null;
-        bay.value = null;
-        device.value = null;
-        voltageOptions.value = [];
-        bayOptions.value = [];
-        deviceOptions.value = [];
-
         if (value) {
-          getVoltage(value); // 查询电压等级
           const obj = stationOptions.value.find((item) => {
             return item.oid === value;
           });
           stationName.value = obj.name;
-          getSwitchByCondition(0, "/" + stationName.value, value); // 查询刀闸列表
+          getModelInfo(stationName.value); // 查询刀闸列表
         } else {
-          getSwitchByCondition(0); // 查询刀闸列表
+          tableData.value = [];
+          modelInfo.value = [];
         }
       }
-
       break;
-    case "voltage":
-      {
-        bay.value = null;
-        device.value = null;
-        bayOptions.value = [];
-        deviceOptions.value = [];
-        tableData.value = [];
-
-        if (value) {
-          getBays(value); // 查询间隔
-          const obj = voltageOptions.value.find((item) => {
-            return item.oid === value;
-          });
-          voltageName.value = obj.name;
-          getSwitchByCondition(
-            1,
-            "/" + stationName.value + "/" + voltageName.value,
-            value
-          ); // 查询刀闸列表
-        } else {
-          getSwitchByCondition(0, "/" + stationName.value, station.value); // 查询刀闸列表
-        }
-      }
-
-      break;
-    case "bay":
-      {
-        device.value = null;
-        deviceOptions.value = [];
-        tableData.value = [];
-
-        if (value) {
-          getDevice(value); // 查询设备
-
-          const obj = bayOptions.value.find((item) => {
-            return item.oid === value;
-          });
-
-          bayName.value = obj.name;
-          getSwitchByCondition(
-            2,
-            "/" +
-              stationName.value +
-              "/" +
-              voltageName.value +
-              "/" +
-              bayName.value,
-            value
-          ); // 查询刀闸列表
-        } else {
-          getSwitchByCondition(
-            1,
-            "/" + stationName.value + "/" + voltageName.value,
-            voltage.value
-          ); // 查询刀闸列表
-        }
-      }
-
-      break;
-    case "device":
-      {
-        if (value) {
-          getDevice(value); // 查询设备
-
-          const obj = deviceOptions.value.find((item) => {
-            return item.oid === value;
-          });
-
-          deviceName.value = obj.name;
-          getSwitchByCondition(
-            2,
-            "/" +
-              stationName.value +
-              "/" +
-              voltageName.value +
-              "/" +
-              bayName.value +
-              "/" +
-              deviceName.value,
-            value
-          ); // 查询刀闸列表
-        }
-      }
-
-      break;
-
     default:
       break;
   }
@@ -405,84 +204,62 @@ const onModalImport = () => {
   }
 };
 
+// 上传确认
+const uploadConfirm = (data) => {
+  console.log("data", data);
+  uploadVisible.value = false;
+  const obj = stationOptions.value.find((item) => {
+    return item.name === data[0].station;
+  });
+  station.value = obj.oid;
+  getModelInfo(data[0].station); // 查询模型解析结果
+};
+
 // 上传取消
 const uploadCancel = () => {
   uploadVisible.value = false;
 };
 
-// 查询刀闸信息列表
-const getSwitchByCondition = async (type, path, oid) => {
-  loading.value = true;
-  const { data } = await mokeGet("getSwitchByCondition", {
-    type,
-    path,
-    oid,
-  });
-
-  tableData.value = [];
-  if (!data?.length) return (loading.value = false);
-  let arrs = [];
-  data.forEach((item, i) => {
-    console.log("map", map(item.digitals, "name").toString());
-    arrs.push({
-      ...item,
-      index: i + 1,
-      // isDigitals: item.digitals.length > 0 ? "是" : "否",
-      digitalsName: !item?.digitals?.length
-        ? "-"
-        : map(item.digitals, "name").join(", "),
+// 设置合并的行和列
+const setTableRowSpan = (tableData, colFields) => {
+  let lastItem = [];
+  // 循环需要合并的列
+  colFields.forEach((field, index) => {
+    tableData.forEach((item) => {
+      // 存值，把合并字段存入行，为了合并单元格时检索列是否含有该字段
+      item.mergeCell = colFields;
+      // 合并字段出现的次数
+      const rowSpan = `rowspan_${field}`;
+      // 比较上一次的存值和该轮的合并字段，判断是否合并到上个单元格
+      if (colFields.slice(0, index + 1).every((e) => lastItem[e] === item[e])) {
+        // 如果是，合并行
+        item[rowSpan] = 0; // 该轮合并字段数量存0
+        // 上轮合并字段数量+1
+        lastItem[rowSpan] += 1;
+      } else {
+        // 初始化进入&& 如果不是，完成一次同类合并，lastItem重新赋值，进入下一次计算
+        item[rowSpan] = 1; // 该轮合并字段第一次出现，数量存1
+        // 改变比较对象，重新赋值，进行下一次计算
+        lastItem = item;
+      }
     });
   });
-  tableData.value = arrs;
-
-  loading.value = false;
 };
 
-// 绑定操作
-const handleOperator = async (row) => {
-  if (row.digitals.length > 0) {
-    ElMessageBox.confirm(`确定取消 ${row.oid} 的当前关联?`, "Warning", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      title: "",
-      type: "warning",
-    })
-      .then(async () => {
-        const res = await mokePost("ClearDigtalRelation", {
-          switchOid: row.oid,
-          digitalOids: row.digitals[0].oid,
-        });
-        if (res.code == 0) {
-          ElMessage({
-            message: res.desc ? res.desc : "关联取消成功！",
-            type: "success",
-          });
-        } else {
-          ElMessage.error(res.desc ? res.desc : "关联失败，请联系管理员！");
-        }
-      })
-      .catch(() => {});
-  } else {
-    conditionVisible.value = !conditionVisible.value;
-    conditionTitle.value = "绑定信息";
-    conditionWidth.value = "600px";
-    conditionData.value = row;
-    conditionStation.value = station.value;
+const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
+  if (row.mergeCell.includes(column.property)) {
+    const rowspan = row[`rowspan_${column.property}`];
+    if (rowspan) {
+      return { rowspan: rowspan, colspan: 1 };
+    } else {
+      return { rowspan: 0, colspan: 0 };
+    }
   }
-};
-
-// 绑定确认
-const onConditionConfirm = (oid) => {
-  conditionVisible.value = false;
-  console.log("oid", oid);
-};
-
-// 绑定取消
-const onConditionCancel = () => {
-  conditionVisible.value = false;
 };
 
 onMounted(() => {
   getStation();
 });
 </script>
+<style lang="scss" scoped>
+</style>

@@ -14,9 +14,9 @@ const routes = [
     },
   },
   {
-    name: "ModelImport",
-    path: "/model/import",
-    component: () => import("@/view/model/import.vue"),
+    name: "ModelIndex",
+    path: "/model/index",
+    component: () => import("@/view/model/index.vue"),
     meta: {
       title: "模型导入",
     },
@@ -30,9 +30,9 @@ const routes = [
     },
   },
   {
-    name: "DeviceImport",
-    path: "/device/import",
-    component: () => import("@/view/device/import.vue"),
+    name: "DeviceIndex",
+    path: "/device/index",
+    component: () => import("@/view/device/index.vue"),
     meta: {
       title: "设备态导入",
     },
@@ -46,9 +46,9 @@ const routes = [
     },
   },
   {
-    name: "ControlImport",
-    path: "/control/import",
-    component: () => import("@/view/control/import.vue"),
+    name: "ControlIndex",
+    path: "/control/index",
+    component: () => import("@/view/control/index.vue"),
     meta: {
       title: "顺控票导入",
     },

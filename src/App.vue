@@ -1,7 +1,7 @@
 <template>
   <div class="oc-layout">
     <div class="oc-container">
-      <LayoutHeader></LayoutHeader>
+      <!-- <LayoutHeader></LayoutHeader> -->
       <div class="oc-container__body">
         <el-aside width="auto"><LayoutAside></LayoutAside></el-aside>
         <div class="oc-main">

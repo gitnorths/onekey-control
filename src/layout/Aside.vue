@@ -59,7 +59,7 @@ const menuData = reactive([
     children: [
       {
         name: "导入",
-        path: "/model/import",
+        path: "/model/index",
       },
       {
         name: "查询结果",
@@ -73,7 +73,7 @@ const menuData = reactive([
     children: [
       {
         name: "导入",
-        path: "/device/import",
+        path: "/device/index",
       },
       {
         name: "查询结果",
@@ -87,7 +87,7 @@ const menuData = reactive([
     children: [
       {
         name: "导入",
-        path: "/control/import",
+        path: "/control/index",
       },
       {
         name: "查询结果",

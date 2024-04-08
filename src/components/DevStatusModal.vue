@@ -8,6 +8,7 @@
     :close-on-press-escape="false"
     destroy-on-close
     modal-class="dialog-import"
+    @open="handleOpen"
     @opened="handleOpened"
   >
     <vxe-table
@@ -16,47 +17,121 @@
       :column-config="{ resizable: true }"
       :loading="loading"
       :data="tableData"
-      :edit-config="{ trigger: 'click', mode: 'cell' }"
+      :edit-config="{ trigger: 'click', mode: 'row' }"
     >
-      <vxe-column type="seq" width="60"></vxe-column>
-      <vxe-column field="name" title="站所" :edit-render="{}">
-        <template #edit="{ row }">
-          <vxe-input v-model="row.name" type="text"></vxe-input>
-        </template>
-      </vxe-column>
-      <vxe-column field="role" title="电压等级" :edit-render="{}">
-        <template #edit="{ row }">
-          <vxe-input v-model="row.role" type="text"></vxe-input>
-        </template>
-      </vxe-column>
-      <vxe-column field="sex" title="间隔" :edit-render="{}">
+      <vxe-column field="stationName" title="站所" :edit-render="{}">
         <template #default="{ row }">
-          <span>{{ formatSex(row.sex) }}</span>
+          <span>{{ row.stationName }}</span>
         </template>
         <template #edit="{ row }">
-          <vxe-select v-model="row.sex" transfer>
+          <vxe-select v-model="row.stationOid" transfer>
             <vxe-option
-              v-for="item in demo1.sexList"
-              :key="item.value"
-              :value="item.value"
-              :label="item.label"
+              v-for="item in stationOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
             ></vxe-option>
           </vxe-select>
         </template>
       </vxe-column>
-      <vxe-column field="age" title="设备" :edit-render="{}">
+      <vxe-column field="voltageName" title="电压等级" :edit-render="{}">
+        <template #default="{ row }">
+          <span>{{ row.voltageName }}</span>
+        </template>
         <template #edit="{ row }">
-          <vxe-input v-model="row.age" type="number"></vxe-input>
+          <vxe-select v-model="row.voltageOid" transfer>
+            <vxe-option
+              v-for="item in voltageOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
         </template>
       </vxe-column>
-      <vxe-column field="date13" title="类型" :edit-render="{}">
+      <vxe-column field="bayName" title="间隔" :edit-render="{}">
+        <template #default="{ row }">
+          <span>{{ row.bayName }}</span>
+        </template>
         <template #edit="{ row }">
-          <vxe-input
-            v-model="row.date13"
-            type="date"
-            placeholder="请选择日期"
-            transfer
-          ></vxe-input>
+          <vxe-select v-model="row.bayOid" transfer>
+            <vxe-option
+              v-for="item in bayOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
+        </template>
+      </vxe-column>
+      <vxe-column field="devName" title="设备" :edit-render="{}">
+        <template #default="{ row }">
+          <span>{{ row.devName }}</span>
+        </template>
+        <template #edit="{ row }">
+          <vxe-select v-model="row.devOid" transfer>
+            <vxe-option
+              v-for="item in devOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
+        </template>
+      </vxe-column>
+      <vxe-column field="pTypeName" title="类型" :edit-render="{}" width="120">
+        <template #default="{ row }">
+          <span>{{ row.pTypeName }}</span>
+        </template>
+        <template #edit="{ row }">
+          <vxe-select v-model="row.pTypeOid" transfer>
+            <vxe-option
+              v-for="item in pTypeOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
+        </template>
+      </vxe-column>
+      <vxe-column
+        field="operateName"
+        title="操作符"
+        :edit-render="{}"
+        width="120"
+      >
+        <template #default="{ row }">
+          <span>{{ row.operateName }}</span>
+        </template>
+        <template #edit="{ row }">
+          <vxe-select v-model="row.operateOid" transfer>
+            <vxe-option
+              v-for="item in operateOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
+        </template>
+      </vxe-column>
+      <vxe-column
+        field="devStatusName"
+        title="刀闸状态"
+        :edit-render="{}"
+        width="120"
+      >
+        <template #default="{ row }">
+          <span>{{ row.devStatusName }}</span>
+        </template>
+        <template #edit="{ row }">
+          <vxe-select v-model="row.devStatusOid" transfer>
+            <vxe-option
+              v-for="item in devStatusOptions"
+              :key="item.oid"
+              :value="item.oid"
+              :label="item.name"
+            ></vxe-option>
+          </vxe-select>
         </template>
       </vxe-column>
     </vxe-table>
@@ -115,40 +190,116 @@ const operateOptions = ref([]);
 const devStatusOptions = ref([]);
 const tableData = ref([]);
 
-const formatSex = (value) => {
-  if (value === "1") {
-    return "男";
-  }
-  if (value === "0") {
-    return "女";
-  }
-  return "";
-};
-
-const findList = () => {
+const handleOpen = async () => {
   loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-    tableData.value = [
-      {
-        id: 10001,
-        name: "Test1",
-        nickname: "T1",
-        role: "Develop",
-        sex: "0",
-        sex2: ["0"],
-        num1: 40,
-        age: 28,
-        address: "Shenzhen",
-        date12: "",
-        date13: "",
-      },
-    ];
-  }, 300);
 };
 
-const handleOpened = () => {
-  findList();
+const handleOpened = async () => {
+  const { data: modelMap } = await mokeGet("getModelMap"); // 获取模型映射信息
+  const { data: devStatusMap } = await mokeGet("getDevStatusMap"); // 获取设备态配置映射信息
+  // 站所
+  const stationData = mapKey("station", modelMap.station);
+  stationOptions.value = stationData;
+  // 电压等级
+  const voltageData = findMapKey(
+    "voltage",
+    modelMap.volLevel,
+    props.data.station,
+    props.data.voltage
+  );
+  voltageOptions.value = voltageData;
+  // 间隔
+  const bayData = findMapKey(
+    "bay",
+    modelMap.bay,
+    props.data.station + "/" + props.data.voltage,
+    props.data.bay
+  );
+  bayOptions.value = bayData;
+  // 设备
+  const devData = findMapKey(
+    "dev",
+    modelMap.switchMap,
+    props.data.station + "/" + props.data.voltage + "/" + props.data.bay,
+    props.data.dev
+  );
+  devOptions.value = devData;
+
+  let pTypeData = []; // 类型
+  let operateData = []; // 操作符
+  let devStatusData = []; // 设备态
+
+  devStatusMap.forEach((item) => {
+    if (item.name === "operate") {
+      operateData = mapKey("operate", item.info, props.data.operate);
+      operateOptions.value = operateData;
+    } else if (item.name === "pType") {
+      pTypeData = mapKey("pType", item.info, props.data.pType);
+      pTypeOptions.value = pTypeData;
+    } else if (item.name === "devStatus") {
+      devStatusData = mapKey("devStatus", item.info, props.data.yxValue);
+      devStatusOptions.value = devStatusData;
+    }
+  });
+
+  const { data } = await mokeGet("getDevstatus", {
+    station: props.data.station,
+  });
+  if (!data?.length) return;
+  const statusData = data[0].status;
+  const stateObj = statusData.find((item) => {
+    return item.status === props.data.state;
+  });
+
+  const stationName = props.data.station;
+  tableData.value = stateObj.parseMap.map((item) => {
+    return {
+      ...item,
+      stationName,
+      stationOid: stationData.find((obj) => {
+        return obj.name === props.data.station;
+      }).oid,
+      voltageName: stationName + "/" + item.voltage,
+      voltageOid: voltageData.find((obj) => {
+        return obj.name === props.data.station + "/" + item.voltage;
+      }).oid,
+      bayName: stationName + "/" + item.voltage + "/" + item.bay,
+      bayOid: bayData.find((obj) => {
+        return (
+          obj.name === props.data.station + "/" + item.voltage + "/" + item.bay
+        );
+      }).oid,
+      devName:
+        stationName + "/" + item.voltage + "/" + item.bay + "/" + item.dev,
+      devOid: devData.find((obj) => {
+        return (
+          obj.name ===
+          props.data.station +
+            "/" +
+            item.voltage +
+            "/" +
+            item.bay +
+            "/" +
+            item.dev
+        );
+      }).oid,
+      pTypeName: item.pType,
+      pTypeOid: pTypeData.find((obj) => {
+        return obj.name === item.pType;
+      }).oid,
+      operateName: item.operate,
+      operateOid: operateData.find((obj) => {
+        return obj.name === item.operate;
+      }).oid,
+      devStatusName: item.yxValue,
+      devStatusOid: devStatusData.find((obj) => {
+        return obj.name === item.yxValue;
+      }).oid,
+    };
+  });
+  console.log("tableData", tableData.value);
+
+  loading.value = false;
 };
 
 const handleCancel = () => {
@@ -157,99 +308,30 @@ const handleCancel = () => {
 
 // 设备态确认入库
 const confirmDevStatus = async () => {
-  const res = await mokePost("confirmDevStatus", {
-    station: modalForm.station,
-    bay: modalForm.bay,
-    statusname: props.data.state,
-    isreplace: 1,
-    devStatusInfos: [
-      {
-        devOid: modalForm.dev,
-        operate: modalForm.operate,
-        pType: modalForm.pType,
-        ycValue: null,
-        yxValue: modalForm.devStatus,
-      },
-    ],
-  });
-
-  if (res.code == 0) {
-    ElMessage({
-      message: res.desc ? res.desc : "新增成功！",
-      type: "success",
-    });
-  } else {
-    ElMessage.error(res.desc ? res.desc : "新增失败，请联系管理员！");
-    handleCancel();
-  }
-};
-
-// 查询模型映射信息
-const getModelMap = async () => {
-  const { data } = await mokeGet("getModelMap");
-
-  // 站所
-  stationOptions.value = mapKey("station", data.station);
-  const stationArr = filter(stationOptions.value, {
-    name: props.data.station,
-  });
-  modalForm.station = stationArr[0].oid;
-
-  // 电压等级
-  voltageOptions.value = findMapKey(
-    "voltage",
-    data.volLevel,
-    props.data.station,
-    props.data.voltage
-  );
-  modalForm.voltage = filter(voltageOptions.value, {
-    name: props.data.station + "/" + props.data.voltage,
-  })[0].oid;
-  // 间隔
-  bayOptions.value = findMapKey(
-    "bay",
-    data.bay,
-    props.data.station + "/" + props.data.voltage,
-    props.data.bay
-  );
-  modalForm.bay = filter(bayOptions.value, {
-    name: props.data.station + "/" + props.data.voltage + "/" + props.data.bay,
-  })[0].oid;
-  // 设备
-  devOptions.value = findMapKey(
-    "dev",
-    data.switchMap,
-    props.data.station + "/" + props.data.voltage + "/" + props.data.bay,
-    props.data.dev
-  );
-  modalForm.dev = filter(devOptions.value, {
-    name:
-      props.data.station +
-      "/" +
-      props.data.voltage +
-      "/" +
-      props.data.bay +
-      "/" +
-      props.data.dev,
-  })[0].oid;
-};
-
-// 获取设备态配置映射信息
-const getDevStatusMap = async () => {
-  const { data } = await mokeGet("getDevStatusMap");
-  data.forEach((item) => {
-    if (item.name === "operate") {
-      operateOptions.value = mapKey("operate", item.info, props.data.operate);
-    } else if (item.name === "pType") {
-      pTypeOptions.value = mapKey("pType", item.info, props.data.pType);
-    } else if (item.name === "devStatus") {
-      devStatusOptions.value = mapKey(
-        "devStatus",
-        item.info,
-        props.data.yxValue
-      );
-    }
-  });
+  // const res = await mokePost("confirmDevStatus", {
+  //   station: station,
+  //   bay: bay,
+  //   statusname: props.data.state,
+  //   isreplace: 1,
+  //   devStatusInfos: [
+  //     {
+  //       devOid: dev,
+  //       operate: operate,
+  //       pType: pType,
+  //       ycValue: null,
+  //       yxValue: devStatus,
+  //     },
+  //   ],
+  // });
+  // if (res.code == 0) {
+  //   ElMessage({
+  //     message: res.desc ? res.desc : "新增成功！",
+  //     type: "success",
+  //   });
+  // } else {
+  //   ElMessage.error(res.desc ? res.desc : "新增失败，请联系管理员！");
+  //   handleCancel();
+  // }
 };
 
 /**
@@ -267,8 +349,6 @@ const findMapKey = (type, object, name, curName) => {
         name: key,
         oid: object[key],
       });
-      const names = name === curName ? name : name + "/" + curName;
-      if (key === names) modalForm[type] = object[key];
     }
   }
   return arr;
@@ -287,8 +367,6 @@ const mapKey = (type, object, names) => {
       name: key,
       oid: object[key],
     });
-
-    if (key === names) modalForm[type] = object[key];
   }
   return arr;
 };
@@ -299,13 +377,8 @@ const handleSelectChange = async (action, value) => {
   switch (action) {
     case "station":
       {
-        modalForm.voltage = null;
         voltageOptions.value = [];
-
-        modalForm.bay = null;
         bayOptions.value = [];
-
-        modalForm.dev = null;
         devOptions.value = [];
 
         if (value) {
@@ -324,10 +397,7 @@ const handleSelectChange = async (action, value) => {
       break;
     case "voltage":
       {
-        modalForm.bay = null;
         bayOptions.value = [];
-
-        modalForm.dev = null;
         devOptions.value = [];
 
         if (value) {
@@ -347,7 +417,6 @@ const handleSelectChange = async (action, value) => {
       break;
     case "bay":
       {
-        modalForm.dev = null;
         devOptions.value = [];
 
         if (value) {
@@ -372,8 +441,8 @@ const handleSelectChange = async (action, value) => {
 };
 
 //查询场站
-const getStation = () => {
-  mokeGet("getStation").then((res) => {
+const getStation = async () => {
+  await mokeGet("getStation").then((res) => {
     if (res.data.length > 0) {
       stationOptions.value = res.data.map((item) => {
         return {
@@ -392,8 +461,8 @@ const getStation = () => {
 };
 
 // 查询电压等级
-const getVoltage = (oid) => {
-  mokeGet("getVoltage", { oid }).then((res) => {
+const getVoltage = async (oid) => {
+  await mokeGet("getVoltage", { oid }).then((res) => {
     if (res.data.length > 0) {
       voltageOptions.value = res.data.map((item) => {
         return {
@@ -407,8 +476,8 @@ const getVoltage = (oid) => {
 };
 
 // 查询间隔
-const getBays = (oid) => {
-  mokeGet("getBay", { oid }).then((res) => {
+const getBays = async (oid) => {
+  await mokeGet("getBay", { oid }).then((res) => {
     if (res.data.length > 0) {
       bayOptions.value = res.data.map((item) => {
         return {
@@ -436,4 +505,5 @@ const handleDevStatusByCondition = async (type, path, oid) => {
   tableLoad.value = false;
 };
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+</style>
