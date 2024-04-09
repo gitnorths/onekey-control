@@ -326,7 +326,15 @@ body {
     }
 }
 
-
+// 解决vxe-select弹出层遮挡的问题
 .vxe-select--panel {
     z-index: 9997 !important;
+}
+
+.z-index-manage {
+    z-index: 9998 !important;
+}
+
+.vxe-modal--wrapper {
+    z-index: 9999 !important;
 }

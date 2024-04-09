@@ -154,7 +154,8 @@ const getDevstatus = (value) => {
     if (!res?.data) return (tableLoad.value = false);
     tableData.value = [];
     for (let i = 0; i < res.data.length; i++) {
-      const dataStatus = res.data[i].status;
+      const resData = res.data[i];
+      const dataStatus = resData.status;
       for (let j = 0; j < dataStatus.length; j++) {
         const dataMap = dataStatus[j];
         dataMap.parseMap.forEach((item) => {
@@ -162,7 +163,8 @@ const getDevstatus = (value) => {
             ...item,
             index: dataMap.sequence,
             state: dataMap.status,
-            station: res.data[i].station,
+            station: resData.station,
+            intetval: resData.intetval,
             condition:
               item.voltage + item.bay + item.dev + item.operate + item.yxValue,
             parseResults: `${item.voltage}/${item.bay}/${item.dev}/${item.operate}/${item.yxValue}`,
