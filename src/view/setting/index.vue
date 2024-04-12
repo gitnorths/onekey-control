@@ -1,6 +1,6 @@
 <template>
-  <div class="oc-box">
-    <div class="oc-box__header">
+  <div class="oc-box oc-flex">
+    <div class="oc-box__header oc-view">
       <vxe-toolbar>
         <template #buttons>
           <vxe-button @click="insertEvent()">新增</vxe-button>
@@ -10,7 +10,7 @@
         </template>
       </vxe-toolbar>
     </div>
-    <div class="oc-box__main">
+    <div class="oc-box__main oc-view">
       <vxe-table
         stripe
         border
@@ -122,4 +122,8 @@ onMounted(() => {
   getGeneralTermsMap();
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.vxe-table {
+  width: 100%;
+}
+</style>

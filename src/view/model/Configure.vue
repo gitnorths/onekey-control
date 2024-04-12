@@ -1,6 +1,6 @@
 <template>
   <div class="oc-box">
-    <div class="oc-box__header">
+    <div class="oc-box__header oc-view">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="选择场站">
           <el-select
@@ -67,7 +67,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="oc-box__main">
+    <div class="oc-box__main oc-view">
       <el-table :data="tableData" style="width: 100%">
         <el-table-column prop="index" label="序号" width="70" />
         <el-table-column prop="stationName" label="场站" />

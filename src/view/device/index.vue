@@ -1,6 +1,6 @@
 <template>
-  <div class="oc-box device-state">
-    <div class="oc-box__header">
+  <div class="oc-box oc-flex device-state">
+    <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
           <el-select
@@ -25,7 +25,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="oc-box__main">
+    <div class="oc-box__main oc-view">
       <div class="device-state__text" v-if="false">
         <dv-decoration-11 style="width: 500px; height: 60px">
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>

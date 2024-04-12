@@ -1,6 +1,6 @@
 <template>
-  <div class="oc-box">
-    <div class="oc-box__header">
+  <div class="oc-box oc-flex">
+    <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
           <el-select
@@ -67,7 +67,7 @@
         </el-form-item> -->
       </el-form>
     </div>
-    <div class="oc-box__main">
+    <div class="oc-box__main oc-view">
       <el-table
         :data="tableData"
         v-loading="loading"
