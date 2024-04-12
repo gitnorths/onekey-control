@@ -1,6 +1,6 @@
 <template>
-  <div class="oc-box">
-    <div class="oc-box__header">
+  <div class="oc-box oc-flex">
+    <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
           <el-select
@@ -24,7 +24,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="oc-box__main">
+    <div class="oc-box__main oc-view">
       <div class="oc-box__left">
         <el-table
           :data="tableData"
@@ -116,8 +116,7 @@ const getStation = async () => {
       }
     })
     .catch((error) => {
-      const { status } = error.response;
-      if (status == 500) tableload.value = false;
+      tableload.value = false;
     });
 };
 

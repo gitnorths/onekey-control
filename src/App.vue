@@ -1,13 +1,11 @@
 <template>
   <div class="oc-layout">
     <div class="oc-container">
-      <!-- <LayoutHeader></LayoutHeader> -->
+      <LayoutHeader></LayoutHeader>
       <div class="oc-container__body">
         <el-aside width="auto"><LayoutAside></LayoutAside></el-aside>
         <div class="oc-main">
-          <dv-border-box6 :color="['#155093', '#235fa7']">
-            <router-view></router-view>
-          </dv-border-box6>
+          <router-view></router-view>
         </div>
       </div>
     </div>
@@ -27,6 +25,8 @@ import LayoutAside from "./layout/Aside.vue";
   &__body {
     flex: 1;
     display: flex;
+    gap: 15px;
+    padding: 85px 15px 15px 15px;
 
     .el-container {
       max-height: 100%;

@@ -1,4 +1,15 @@
+$--oc-background-color : #303030;
+$--oc-border-color     : #2c7ecf;
+
+$--oc-header-background-color: #05172F;
+$--oc-header-box-shadow-color:#000000;
+
+$--oc-aside-background-color : #05172F;
+
+
 html.dark {
+
+    --el-menu-hover-bg-color: #003b51;
 
     --vxe-font-color                        : #ffffff;
     --vxe-toolbar-background-color          : transform;
@@ -111,9 +122,10 @@ body {
 }
 
 .oc-layout {
-    width   : 100vw;
-    height  : 100vh;
-    overflow: hidden;
+    width        : 100vw;
+    height       : 100vh;
+    overflow     : hidden;
+    // background: rgba($--oc-background-color, 0.5);
 
     >.el-container {
         height: 100%;
@@ -121,83 +133,115 @@ body {
 }
 
 .oc-header {
-    display       : flex;
-    flex-direction: column;
-    height        : 60px;
-    background    : linear-gradient(#051526, #155093);
-    border-bottom : 1px solid #00c2ff;
+    display          : flex;
+    flex-direction   : column;
+    // background    : linear-gradient(#051526, #155093);
+    background       : $--oc-header-background-color;
+    box-shadow       : 0 10px 30px $--oc-header-box-shadow-color;
+
+    &.fixed {
+        position: fixed;
+        left    : 0;
+        top     : 0;
+        right   : 0;
+        z-index : 1005;
+    }
 
     &__wrapper {
         flex           : 1;
         display        : flex;
         align-items    : center;
         justify-content: space-between;
+        padding        : 15px;
     }
 
     &__title {
         display        : flex;
         align-items    : center;
         justify-content: center;
-        height         : 100%;
-        padding        : 0 20px;
-        color          : #ffffff;
-        font-size      : 22px;
-        font-weight    : bold;
+        height         : 40px;
+        line-height    : 40px;
+        padding        : 0;
 
         span {
-            padding: 0 10px;
+            padding    : 0 15px;
+            color      : #ffffff;
+            font-size  : 24px;
+            font-weight: 600;
         }
     }
 }
 
-.el-aside {
-    width: 200px;
-}
-
-.el-main {
-    padding: 10px;
-}
-
 .oc-aside {
-    height : 100%;
-    padding: 10px 0 10px 10px;
+    position: relative;
+    width   : 250px;
+    height  : 100%;
+
+    .oc-view__aside {
+        position: absolute;
+        top     : 0;
+        left    : 0;
+        width   : 100%;
+        height  : 100%;
+        z-index : 0;
+    }
 
     &__box {
-        height : 100%;
-        padding: 30px 10px 10px;
+        position: relative;
+        z-index : 10;
+        height  : 100%;
+        padding : 20px 10px 10px;
 
         .el-menu {
             height      : 100%;
             border-width: 0;
 
-            .el-sub-menu__title {
-                font-weight: bold;
-                font-size  : 14px;
-            }
+            .el-sub-menu {
+                &__title {
+                    font-weight: bold;
+                    font-size  : 14px;
+                }
 
-            &-item {
-                &-group {
-                    &__title {
+                .el-menu-item {
+                    font-size  : 14px;
+                    font-weight: bold;
+
+                    &-group__title {
                         display: none;
-                    }
-
-                    >ul {
-                        padding: 5px 0;
                     }
                 }
             }
+
         }
     }
 }
 
+.oc-view {
+    border             : 15px solid rgba(0, 0, 0, 0.1);
+    border-image-source: url(../images/bg-view__main.png);
+    border-image-slice : 12 12 12 12;
+    border-image-repeat: stretch;
+    background-image   : url(../images/bg-view__line.png);
+    background-repeat  : repeat;
+
+    &__aside {
+        border             : 30px solid rgba(0, 0, 0, 0.1);
+        border-image-source: url(../images/bg-view__aside.png);
+        border-image-slice : 40 40 40 40;
+        border-image-repeat: stretch;
+    }
+}
+
+.oc-flex {
+    display       : flex;
+    flex-direction: column;
+    gap           : 15px;
+}
+
 .oc-box {
-    height : 100%;
-    padding: 10px;
+    height: 100%;
 
     &__header {
-        padding      : 10px 30px;
-        border-bottom: 1px solid #155093;
-
         .el-form {
             overflow: hidden;
 
@@ -219,14 +263,9 @@ body {
     }
 
     &__main {
+        flex   : 1;
         display: flex;
         gap    : 15px;
-        height : calc(100% - 60px);
-        padding: 15px 15px 0;
-
-        &>div {
-            transition: 0.3s all;
-        }
     }
 
     &__left {

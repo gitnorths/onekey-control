@@ -1,35 +1,34 @@
 <template>
   <div class="oc-aside">
-    <dv-border-box13 :color="['#155093', '#235fa7']">
-      <div class="oc-aside__box">
-        <el-menu
-          router
-          :default-active="defaultActive"
-          unique-opened
-          class="el-menu-vertical-demo"
-        >
-          <template v-for="(item, i) in menuData" :key="i">
-            <el-sub-menu :index="item.key" v-if="item?.children?.length">
-              <template #title>
-                <span>{{ item.name }}</span>
-              </template>
-              <el-menu-item-group>
-                <el-menu-item
-                  v-for="(itemChildren, k) in item?.children"
-                  :key="k"
-                  :index="itemChildren.path"
-                >
-                  {{ itemChildren.name }}
-                </el-menu-item>
-              </el-menu-item-group>
-            </el-sub-menu>
-            <el-menu-item v-else :index="item.path">
+    <div class="oc-view__aside"></div>
+    <div class="oc-aside__box">
+      <el-menu
+        router
+        :default-active="defaultActive"
+        unique-opened
+        class="el-menu-vertical-demo"
+      >
+        <template v-for="(item, i) in menuData" :key="i">
+          <el-sub-menu :index="item.key" v-if="item?.children?.length">
+            <template #title>
               <span>{{ item.name }}</span>
-            </el-menu-item>
-          </template>
-        </el-menu>
-      </div>
-    </dv-border-box13>
+            </template>
+            <el-menu-item-group>
+              <el-menu-item
+                v-for="(itemChildren, k) in item?.children"
+                :key="k"
+                :index="itemChildren.path"
+              >
+                {{ itemChildren.name }}
+              </el-menu-item>
+            </el-menu-item-group>
+          </el-sub-menu>
+          <el-menu-item v-else :index="item.path">
+            <span>{{ item.name }}</span>
+          </el-menu-item>
+        </template>
+      </el-menu>
+    </div>
   </div>
 </template>
 <script setup>
