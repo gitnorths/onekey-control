@@ -59,11 +59,12 @@
         </dv-decoration-11>
       </div>
       <el-table
+        v-if="tableLoad"
         :data="tableData"
         v-loading="tableLoad"
-        class="oc-table"
         stripe
-        style="width: 100%"
+        empty-text="暂无数据"
+        class="oc-table"
       >
         <template v-for="(item, i) in tableColumn" :key="i">
           <el-table-column
@@ -74,6 +75,9 @@
           />
         </template>
       </el-table>
+      <div v-else class="oc-empty">
+        <el-empty description="暂无数据" />
+      </div>
     </div>
   </div>
 </template>
@@ -106,23 +110,27 @@ const tableColumn = ref([
 
 //查询场站
 const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
+  mokeGet("getStation")
+    .then((res) => {
+      if (res.data.length > 0) {
+        stationOptions.value = res.data.map((item) => {
+          return {
+            ...item,
+            label: item.name,
+            value: item.oid,
+          };
+        });
 
-      const resData = res.data[1];
-      getVoltage(resData.oid);
-      station.value = resData.oid;
-      stationName.value = resData.name;
-      handleDevStatusByCondition(0, "/" + stationName.value, station.value); // 查询设备态信息
-    }
-  });
+        const resData = res.data[1];
+        getVoltage(resData.oid);
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        handleDevStatusByCondition(0, "/" + stationName.value, station.value); // 查询设备态信息
+      }
+    })
+    .catch((error) => {
+      tableLoad.value = false;
+    });
 };
 
 // 查询电压等级

@@ -24,12 +24,13 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="oc-box__main oc-view">
-      <div class="oc-box__left">
+    <div class="oc-box__main">
+      <div class="oc-box__left oc-view">
         <el-table
+          v-if="tableLoad"
           :data="tableData"
           :span-method="objectSpanMethod"
-          v-loading="tableload"
+          v-loading="tableLoad"
           stripe
           empty-text="暂无数据"
           class="oc-table"
@@ -43,9 +44,17 @@
             />
           </template>
         </el-table>
+        <div v-else class="oc-empty">
+          <el-empty description="暂无数据" />
+        </div>
       </div>
-      <div class="oc-box__right">
-        <el-descriptions title="导入结果详情" :column="1">
+      <div class="oc-box__right oc-view">
+        <el-descriptions
+          title="导入结果详情"
+          :column="1"
+          v-if="tableLoad"
+          v-loading="tableLoad"
+        >
           <el-descriptions-item
             v-for="item in modelInfo"
             :key="item.name"
@@ -56,6 +65,9 @@
             </p>
           </el-descriptions-item>
         </el-descriptions>
+        <div v-else class="oc-empty">
+          <el-empty description="暂无数据" />
+        </div>
       </div>
     </div>
     <!-- 模型导入 START-->
@@ -82,7 +94,7 @@ const stationName = ref(null);
 const stationOptions = ref([]);
 
 // 表格参数
-const tableload = ref(true);
+const tableLoad = ref(true);
 const tableData = ref([]);
 const tableColumns = ref([]);
 
@@ -116,22 +128,22 @@ const getStation = async () => {
       }
     })
     .catch((error) => {
-      tableload.value = false;
+      tableLoad.value = false;
     });
 };
 
 // 查询模型解析结果
 const getModelInfo = async (value) => {
-  tableload.value = true;
+  tableLoad.value = true;
   const { data } = await mokeGet("getModelInfo", {
     station: value,
   });
 
-  if (!data?.length) return (tableload.value = false);
+  if (!data?.length) return (tableLoad.value = false);
   const dataInfo = data[0][value];
   const dataT = dataInfo.data; // 表格数据
   const dataD = dataInfo.desc; // 说明数据
-  tableload.value = false;
+  tableLoad.value = false;
   tableColumns.value = [];
   modelInfo.value = [];
 

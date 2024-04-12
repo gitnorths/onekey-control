@@ -69,10 +69,12 @@
     </div>
     <div class="oc-box__main oc-view">
       <el-table
+        v-if="tableLoad"
         :data="tableData"
-        v-loading="loading"
-        height="75vh"
-        style="width: 100%"
+        v-loading="tableLoad"
+        stripe
+        empty-text="暂无数据"
+        class="oc-table"
       >
         <template v-for="(item, i) in tableColumns" :key="i">
           <el-table-column
@@ -105,6 +107,9 @@
           />
         </template>
       </el-table>
+      <div v-else class="oc-empty">
+        <el-empty description="暂无数据" />
+      </div>
     </div>
     <!-- SCD导入模型关联 START -->
     <ConditionModal
@@ -140,7 +145,7 @@ const device = ref(null);
 const deviceName = ref(null);
 const deviceOptions = ref([]);
 
-const loading = ref(true);
+const tableLoad = ref(true);
 const tableData = ref([]);
 const tableColumns = ref([
   { prop: "index", label: "序号", width: "80px", align: "center" },
@@ -160,24 +165,28 @@ const conditionStation = ref(null);
 
 //查询场站
 const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
+  mokeGet("getStation")
+    .then((res) => {
+      if (res.data.length > 0) {
+        stationOptions.value = res.data.map((item) => {
+          return {
+            ...item,
+            label: item.name,
+            value: item.oid,
+          };
+        });
 
-      const resData = res.data[1];
-      station.value = resData.oid;
-      stationName.value = resData.name;
-      // getDigtal(resData.name, resData.oid); // 查询信号
-      getVoltage(station.value); // 查询电压等级
-      getSwitchByCondition(0, "/" + stationName.value, station.value); // 查询刀闸列表
-    }
-  });
+        const resData = res.data[1];
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        // getDigtal(resData.name, resData.oid); // 查询信号
+        getVoltage(station.value); // 查询电压等级
+        getSwitchByCondition(0, "/" + stationName.value, station.value); // 查询刀闸列表
+      }
+    })
+    .catch((error) => {
+      tableLoad.value = false;
+    });
 };
 
 // 查询电压等级
@@ -387,7 +396,7 @@ const handleSelectChange = (action, value) => {
 
 // 查询刀闸信息列表
 const getSwitchByCondition = async (type, path, oid) => {
-  loading.value = true;
+  tableLoad.value = true;
   const { data } = await mokeGet("getSwitchByCondition", {
     type,
     path,
@@ -395,7 +404,7 @@ const getSwitchByCondition = async (type, path, oid) => {
   });
 
   tableData.value = [];
-  if (!data?.length) return (loading.value = false);
+  if (!data?.length) return (tableLoad.value = false);
   let arrs = [];
   data.forEach((item, i) => {
     arrs.push({
@@ -409,7 +418,7 @@ const getSwitchByCondition = async (type, path, oid) => {
   });
   tableData.value = arrs;
 
-  loading.value = false;
+  tableLoad.value = false;
 };
 
 // 绑定操作

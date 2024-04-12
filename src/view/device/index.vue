@@ -31,16 +31,14 @@
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
       </div>
-      <!-- <div v-if="!tableData.length" class="oc-empty">
-        <el-empty description="暂无数据" />
-      </div> -->
       <el-table
+        v-if="tableLoad"
         :data="tableData"
         :span-method="objectSpanMethod"
         v-loading="tableLoad"
-        class="oc-table"
         stripe
-        style="width: 100%"
+        empty-text="暂无数据"
+        class="oc-table"
       >
         <template v-for="(item, i) in tableColumn" :key="i">
           <el-table-column
@@ -69,6 +67,9 @@
           />
         </template>
       </el-table>
+      <div v-else class="oc-empty">
+        <el-empty description="暂无数据" />
+      </div>
     </div>
     <UploadModal
       v-model="uploadVisible"
@@ -104,6 +105,7 @@ const stationName = ref(null);
 const stationOptions = ref([]);
 
 const tableLoad = ref(true);
+const tableData = ref([]);
 const tableColumn = ref([
   { prop: "index", label: "序号", width: "80px", align: "center" },
   { prop: "state", label: "状态" },
@@ -111,7 +113,6 @@ const tableColumn = ref([
   { prop: "parseResults", label: "解析结果" },
   { prop: "operator", label: "操作", width: "150px", align: "center" },
 ]);
-const tableData = ref([]);
 
 // 导入信息
 const uploadVisible = ref(false);
@@ -127,22 +128,26 @@ const modalData = ref({});
 
 //查询场站
 const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
+  mokeGet("getStation")
+    .then((res) => {
+      if (res.data.length > 0) {
+        stationOptions.value = res.data.map((item) => {
+          return {
+            ...item,
+            label: item.name,
+            value: item.oid,
+          };
+        });
 
-      const resData = res.data[1];
-      station.value = resData.oid;
-      stationName.value = resData.name;
-      getDevstatus(resData.name); // 查询设备态信息
-    }
-  });
+        const resData = res.data[1];
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        getDevstatus(resData.name); // 查询设备态信息
+      }
+    })
+    .catch((error) => {
+      tableLoad.value = false;
+    });
 };
 
 // 查询设备态信息

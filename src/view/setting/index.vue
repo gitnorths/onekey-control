@@ -12,6 +12,7 @@
     </div>
     <div class="oc-box__main oc-view">
       <vxe-table
+        v-if="tableLoad"
         stripe
         border
         show-overflow
@@ -34,9 +35,9 @@
           </template>
         </vxe-column> -->
       </vxe-table>
-      <!-- <div v-else class="oc-empty">
+      <div v-else class="oc-empty">
         <el-empty description="暂无数据" />
-      </div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -48,6 +49,7 @@ import { mokePost } from "@/api";
 import { ElMessage } from "element-plus";
 
 const xTable = ref();
+const tableLoad = ref(true);
 const tableData = ref([]);
 
 const insertEvent = async (row) => {
@@ -88,20 +90,27 @@ const saveEvent = () => {
 
 // 查询通用操作术语接口
 const getGeneralTermsMap = () => {
-  mokeGet("generalTermsMap").then((res) => {
-    if (!res?.data) return;
-    tableData.value = [];
-    const obj = res.data.parseAssistanceMap;
-    for (const key in obj) {
-      if (Object.hasOwnProperty.call(obj, key)) {
-        const value = obj[key];
-        tableData.value.push({
-          key,
-          //   value,
-        });
+  mokeGet("generalTermsMap")
+    .then((res) => {
+      if (!res?.data) return (tableLoad.value = false);
+      tableData.value = [];
+      const obj = res.data.parseAssistanceMap;
+      for (const key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          const value = obj[key];
+          tableData.value.push({
+            key,
+            //   value,
+          });
+        }
       }
-    }
-  });
+    })
+    .catch((error) => {
+      tableLoad.value = false;
+    })
+    .finally(() => {
+      tableLoad.value = false;
+    });
 };
 
 // 设置通用操作术语接口

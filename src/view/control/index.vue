@@ -35,12 +35,13 @@
         <el-empty description="暂无数据" />
       </div> -->
       <el-table
+        v-if="tableLoad"
         :data="tableData"
         :span-method="objectSpanMethod"
         v-loading="tableLoad"
-        class="oc-table"
         stripe
-        style="width: 100%"
+        empty-text="暂无数据"
+        class="oc-table"
       >
         <template v-for="(item, i) in tableColumn" :key="i">
           <el-table-column
@@ -69,6 +70,9 @@
           />
         </template>
       </el-table>
+      <div v-else class="oc-empty">
+        <el-empty description="暂无数据" />
+      </div>
     </div>
     <UploadModal
       v-model="uploadVisible"
@@ -127,23 +131,27 @@ const modalData = ref({});
 
 //查询场站
 const getStation = () => {
-  mokeGet("getStation").then((res) => {
-    if (res.data.length > 0) {
-      stationOptions.value = res.data.map((item) => {
-        return {
-          ...item,
-          label: item.name,
-          value: item.oid,
-        };
-      });
+  mokeGet("getStation")
+    .then((res) => {
+      if (res.data.length > 0) {
+        stationOptions.value = res.data.map((item) => {
+          return {
+            ...item,
+            label: item.name,
+            value: item.oid,
+          };
+        });
 
-      const resData = res.data[1];
-      station.value = resData.oid;
-      stationName.value = resData.name;
+        const resData = res.data[1];
+        station.value = resData.oid;
+        stationName.value = resData.name;
+        tableLoad.value = false;
+        // getDevstatus(resData.name); // 查询设备态信息
+      }
+    })
+    .catch((error) => {
       tableLoad.value = false;
-      // getDevstatus(resData.name); // 查询设备态信息
-    }
-  });
+    });
 };
 
 // 查询设备态信息

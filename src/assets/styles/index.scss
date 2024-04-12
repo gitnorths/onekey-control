@@ -219,7 +219,7 @@ body {
 .oc-view {
     border             : 15px solid rgba(0, 0, 0, 0.1);
     border-image-source: url(../images/bg-view__main.png);
-    border-image-slice : 12 12 12 12;
+    border-image-slice : 12;
     border-image-repeat: stretch;
     background-image   : url(../images/bg-view__line.png);
     background-repeat  : repeat;
@@ -227,7 +227,7 @@ body {
     &__aside {
         border             : 30px solid rgba(0, 0, 0, 0.1);
         border-image-source: url(../images/bg-view__aside.png);
-        border-image-slice : 40 40 40 40;
+        border-image-slice : 50;
         border-image-repeat: stretch;
     }
 }
