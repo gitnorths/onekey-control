@@ -1,9 +1,11 @@
 <template>
   <div class="oc-layout">
     <div class="oc-container">
-      <LayoutHeader></LayoutHeader>
+      <!-- <LayoutHeader></LayoutHeader> -->
       <div class="oc-container__body">
-        <el-aside width="auto"><LayoutAside></LayoutAside></el-aside>
+        <el-aside width="auto">
+          <LayoutAside></LayoutAside>
+        </el-aside>
         <div class="oc-main">
           <router-view></router-view>
         </div>
@@ -26,6 +28,7 @@ import LayoutAside from "./layout/Aside.vue";
     flex: 1;
     display: flex;
     gap: 15px;
+    height: 100%;
     padding: 85px 15px 15px 15px;
 
     .el-container {

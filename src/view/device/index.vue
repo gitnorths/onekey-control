@@ -3,19 +3,9 @@
     <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
-          <el-select
-            v-model="station"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('station', $event)"
-          >
-            <el-option
-              v-for="item in stationOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="station" placeholder="请选择" clearable filterable
+            @change="handleSelectChange('station', $event)">
+            <el-option v-for="item in stationOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -31,62 +21,29 @@
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
       </div>
-      <el-table
-        v-if="tableLoad"
-        :data="tableData"
-        :span-method="objectSpanMethod"
-        v-loading="tableLoad"
-        stripe
-        empty-text="暂无数据"
-        class="oc-table"
-      >
+      <el-table v-if="tableLoad || tableData.length" :data="tableData" :span-method="objectSpanMethod"
+        v-loading="tableLoad" stripe empty-text="暂无数据" class="oc-table">
         <template v-for="(item, i) in tableColumn" :key="i">
-          <el-table-column
-            v-if="item.prop == 'operator'"
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          >
+          <el-table-column v-if="item.prop == 'operator'" :prop="item.prop" :label="item.label"
+            :width="item.width ? item.width : null" :align="item.align ? item.align : null">
             <template #default="scope">
-              <el-button
-                type="warning"
-                size="small"
-                @click="handleConfirm(scope.$index, scope.row)"
-              >
+              <el-button type="warning" size="small" @click="handleConfirm(scope.$index, scope.row)">
                 确认
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column
-            v-else
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          />
+          <el-table-column v-else :prop="item.prop" :label="item.label" :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null" />
         </template>
       </el-table>
       <div v-else class="oc-empty">
         <el-empty description="暂无数据" />
       </div>
     </div>
-    <UploadModal
-      v-model="uploadVisible"
-      :title="uploadTitle"
-      :width="uploadWidth"
-      :url="uploadUrl"
-      @confirm="uploadConfirm"
-      @cancel="uploadCancel"
-    ></UploadModal>
-    <DevStatusModal
-      v-model="modalVisible"
-      :title="modalTitle"
-      :width="modalWidth"
-      :data="modalData"
-      @confirm="modalConfirm"
-      @cancel="modalCancel"
-    ></DevStatusModal>
+    <UploadModal v-model="uploadVisible" :title="uploadTitle" :width="uploadWidth" :url="uploadUrl"
+      @confirm="uploadConfirm" @cancel="uploadCancel"></UploadModal>
+    <DevStatusModal v-model="modalVisible" :title="modalTitle" :width="modalWidth" :data="modalData"
+      @confirm="modalConfirm" @cancel="modalCancel"></DevStatusModal>
   </div>
 </template>
 <script setup>
@@ -313,6 +270,7 @@ const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+
     .el-text {
       font-size: 20px;
       font-weight: bold;

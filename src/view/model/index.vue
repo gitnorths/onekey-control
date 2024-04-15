@@ -3,20 +3,9 @@
     <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
-          <el-select
-            v-model="station"
-            placeholder="请选择"
-            no-data-text="暂无数据"
-            clearable
-            filterable
-            @change="handleSelectChange('station', $event)"
-          >
-            <el-option
-              v-for="item in stationOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="station" placeholder="请选择" no-data-text="暂无数据" clearable filterable
+            @change="handleSelectChange('station', $event)">
+            <el-option v-for="item in stationOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -26,22 +15,11 @@
     </div>
     <div class="oc-box__main">
       <div class="oc-box__left oc-view">
-        <el-table
-          v-if="tableLoad"
-          :data="tableData"
-          :span-method="objectSpanMethod"
-          v-loading="tableLoad"
-          stripe
-          empty-text="暂无数据"
-          class="oc-table"
-        >
+        <el-table v-if="tableLoad || tableData.length" :data="tableData" :span-method="objectSpanMethod"
+          v-loading="tableLoad" stripe empty-text="暂无数据" class="oc-table">
           <template v-for="(item, i) in tableColumns" :key="i">
-            <el-table-column
-              :prop="item.prop"
-              :label="item.label"
-              :width="item.width ? item.width : null"
-              :align="item.align ? item.align : null"
-            />
+            <el-table-column :prop="item.prop" :label="item.label" :width="item.width ? item.width : null"
+              :align="item.align ? item.align : null" />
           </template>
         </el-table>
         <div v-else class="oc-empty">
@@ -49,17 +27,8 @@
         </div>
       </div>
       <div class="oc-box__right oc-view">
-        <el-descriptions
-          title="导入结果详情"
-          :column="1"
-          v-if="tableLoad"
-          v-loading="tableLoad"
-        >
-          <el-descriptions-item
-            v-for="item in modelInfo"
-            :key="item.name"
-            :label="item.name"
-          >
+        <el-descriptions title="导入结果详情" :column="1" v-if="tableLoad || modelInfo.length" v-loading="tableLoad">
+          <el-descriptions-item v-for="item in modelInfo" :key="item.name" :label="item.name">
             <p v-for="itemData in item.data" :key="itemData">
               {{ itemData }}
             </p>
@@ -71,14 +40,8 @@
       </div>
     </div>
     <!-- 模型导入 START-->
-    <UploadModal
-      v-model="uploadVisible"
-      :title="uploadTitle"
-      :width="uploadWidth"
-      :url="uploadUrl"
-      @confirm="uploadConfirm"
-      @cancel="uploadCancel"
-    ></UploadModal>
+    <UploadModal v-model="uploadVisible" :title="uploadTitle" :width="uploadWidth" :url="uploadUrl"
+      @confirm="uploadConfirm" @cancel="uploadCancel"></UploadModal>
     <!-- 模型导入 END-->
   </div>
 </template>
@@ -135,6 +98,8 @@ const getStation = async () => {
 // 查询模型解析结果
 const getModelInfo = async (value) => {
   tableLoad.value = true;
+  tableData.value = [];
+  modelInfo.value = [];
   const { data } = await mokeGet("getModelInfo", {
     station: value,
   });
@@ -143,7 +108,6 @@ const getModelInfo = async (value) => {
   const dataInfo = data[0][value];
   const dataT = dataInfo.data; // 表格数据
   const dataD = dataInfo.desc; // 说明数据
-  tableLoad.value = false;
   tableColumns.value = [];
   modelInfo.value = [];
 
@@ -152,7 +116,11 @@ const getModelInfo = async (value) => {
     for (const key in column) {
       if (Object.hasOwnProperty.call(column, key)) {
         const name = column[key];
-        tableColumns.value.push({ prop: key, label: name });
+        tableColumns.value.push({
+          prop: key,
+          label: name,
+          width: key !== "dev" ? '260' : null
+        });
       }
     }
     dataT.shift(); // 删除数组第一项
@@ -171,21 +139,25 @@ const getModelInfo = async (value) => {
             key === "station"
               ? "站所"
               : key === "voltage"
-              ? "电压等级"
-              : key === "bay"
-              ? "间隔"
-              : key === "switch"
-              ? "设备"
-              : "",
+                ? "电压等级"
+                : key === "bay"
+                  ? "间隔"
+                  : key === "switch"
+                    ? "设备"
+                    : "",
           data: toArray(dataD[key]),
         });
       }
     }
   }
+  tableLoad.value = false;
 };
 
 // 监听select变化
 const handleSelectChange = (action, value) => {
+  tableLoad.value = true;
+  tableData.value = [];
+  modelInfo.value = [];
   switch (action) {
     case "station":
       {
@@ -196,8 +168,9 @@ const handleSelectChange = (action, value) => {
           stationName.value = obj.name;
           getModelInfo(stationName.value); // 查询刀闸列表
         } else {
-          tableData.value = [];
-          modelInfo.value = [];
+          setTimeout(() => {
+            tableLoad.value = false;
+          }, 1000);
         }
       }
       break;
@@ -272,5 +245,4 @@ onMounted(() => {
   getStation();
 });
 </script>
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

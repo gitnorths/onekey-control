@@ -3,51 +3,20 @@
     <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
-          <el-select
-            v-model="station"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('station', $event)"
-          >
-            <el-option
-              v-for="item in stationOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="station" placeholder="请选择" clearable filterable
+            @change="handleSelectChange('station', $event)">
+            <el-option v-for="item in stationOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item label="电压等级">
-          <el-select
-            v-model="voltage"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('voltage', $event)"
-          >
-            <el-option
-              v-for="item in voltageOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="voltage" placeholder="请选择" clearable filterable
+            @change="handleSelectChange('voltage', $event)">
+            <el-option v-for="item in voltageOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item label="间隔">
-          <el-select
-            v-model="bay"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('bay', $event)"
-          >
-            <el-option
-              v-for="item in bayOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="bay" placeholder="请选择" clearable filterable @change="handleSelectChange('bay', $event)">
+            <el-option v-for="item in bayOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -58,21 +27,11 @@
           <el-text size="large">{{ stationName }}-设备态解析结果</el-text>
         </dv-decoration-11>
       </div>
-      <el-table
-        v-if="tableLoad"
-        :data="tableData"
-        v-loading="tableLoad"
-        stripe
-        empty-text="暂无数据"
-        class="oc-table"
-      >
+      <el-table v-if="tableLoad || tableData.length" :data="tableData" v-loading="tableLoad" stripe empty-text="暂无数据"
+        class="oc-table">
         <template v-for="(item, i) in tableColumn" :key="i">
-          <el-table-column
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          />
+          <el-table-column :prop="item.prop" :label="item.label" :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null" />
         </template>
       </el-table>
       <div v-else class="oc-empty">
@@ -234,11 +193,11 @@ const handleSelectChange = (action, value) => {
           handleDevStatusByCondition(
             2,
             "/" +
-              stationName.value +
-              "/" +
-              voltageName.value +
-              "/" +
-              bayName.value,
+            stationName.value +
+            "/" +
+            voltageName.value +
+            "/" +
+            bayName.value,
             value
           );
         } else {
@@ -270,6 +229,7 @@ onMounted(() => {
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+
     .el-text {
       font-size: 20px;
       font-weight: bold;

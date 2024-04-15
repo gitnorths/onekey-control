@@ -3,51 +3,20 @@
     <div class="oc-box__header oc-view">
       <el-form :inline="true">
         <el-form-item label="站所">
-          <el-select
-            v-model="station"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('station', $event)"
-          >
-            <el-option
-              v-for="item in stationOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="station" placeholder="请选择" clearable filterable
+            @change="handleSelectChange('station', $event)">
+            <el-option v-for="item in stationOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item label="电压等级">
-          <el-select
-            v-model="voltage"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('voltage', $event)"
-          >
-            <el-option
-              v-for="item in voltageOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="voltage" placeholder="请选择" clearable filterable
+            @change="handleSelectChange('voltage', $event)">
+            <el-option v-for="item in voltageOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <el-form-item label="间隔">
-          <el-select
-            v-model="bay"
-            placeholder="请选择"
-            clearable
-            filterable
-            @change="handleSelectChange('bay', $event)"
-          >
-            <el-option
-              v-for="item in bayOptions"
-              :key="item.oid"
-              :label="item.name"
-              :value="item.oid"
-            />
+          <el-select v-model="bay" placeholder="请选择" clearable filterable @change="handleSelectChange('bay', $event)">
+            <el-option v-for="item in bayOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
         <!-- <el-form-item label="设备">
@@ -68,43 +37,23 @@
       </el-form>
     </div>
     <div class="oc-box__main oc-view">
-      <el-table
-        v-if="tableLoad"
-        :data="tableData"
-        v-loading="tableLoad"
-        stripe
-        empty-text="暂无数据"
-        class="oc-table"
-      >
+      <el-table v-if="tableLoad || tableData.length" :data="tableData" v-loading="tableLoad" stripe empty-text="暂无数据"
+        class="oc-table">
         <template v-for="(item, i) in tableColumns" :key="i">
-          <el-table-column
-            v-if="item.prop == 'operator'"
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          >
+          <el-table-column v-if="item.prop == 'operator'" :prop="item.prop" :label="item.label"
+            :width="item.width ? item.width : null" :align="item.align ? item.align : null">
             <template #default="scope">
               <el-link type="warning" @click="handleOperator(scope.row, 1)">
                 绑定
               </el-link>
               &nbsp;
-              <el-link
-                v-if="scope.row.digitals.length > 0"
-                type="danger"
-                @click="handleOperator(scope.row, 2)"
-              >
+              <el-link v-if="scope.row.digitals.length > 0" type="danger" @click="handleOperator(scope.row, 2)">
                 解绑
               </el-link>
             </template>
           </el-table-column>
-          <el-table-column
-            v-else
-            :prop="item.prop"
-            :label="item.label"
-            :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null"
-          />
+          <el-table-column v-else :prop="item.prop" :label="item.label" :width="item.width ? item.width : null"
+            :align="item.align ? item.align : null" />
         </template>
       </el-table>
       <div v-else class="oc-empty">
@@ -112,15 +61,8 @@
       </div>
     </div>
     <!-- SCD导入模型关联 START -->
-    <ConditionModal
-      v-model="conditionVisible"
-      :title="conditionTitle"
-      :width="conditionWidth"
-      :data="conditionData"
-      :station="conditionStation"
-      @confirm="onConditionConfirm"
-      @cancel="onConditionCancel"
-    ></ConditionModal>
+    <ConditionModal v-model="conditionVisible" :title="conditionTitle" :width="conditionWidth" :data="conditionData"
+      :station="conditionStation" @confirm="onConditionConfirm" @cancel="onConditionCancel"></ConditionModal>
     <!-- SCD导入模型关联 END -->
   </div>
 </template>
@@ -345,11 +287,11 @@ const handleSelectChange = (action, value) => {
           getSwitchByCondition(
             2,
             "/" +
-              stationName.value +
-              "/" +
-              voltageName.value +
-              "/" +
-              bayName.value,
+            stationName.value +
+            "/" +
+            voltageName.value +
+            "/" +
+            bayName.value,
             value
           ); // 查询刀闸列表
         } else {
@@ -375,13 +317,13 @@ const handleSelectChange = (action, value) => {
           getSwitchByCondition(
             2,
             "/" +
-              stationName.value +
-              "/" +
-              voltageName.value +
-              "/" +
-              bayName.value +
-              "/" +
-              deviceName.value,
+            stationName.value +
+            "/" +
+            voltageName.value +
+            "/" +
+            bayName.value +
+            "/" +
+            deviceName.value,
             value
           ); // 查询刀闸列表
         }
@@ -444,7 +386,7 @@ const handleOperator = async (row, type) => {
           ElMessage.error(res.desc ? res.desc : "关联失败，请联系管理员！");
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }
   if (type == 1) {
     conditionVisible.value = !conditionVisible.value;

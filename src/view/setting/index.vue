@@ -11,29 +11,15 @@
       </vxe-toolbar>
     </div>
     <div class="oc-box__main oc-view">
-      <vxe-table
-        v-if="tableLoad"
-        stripe
-        border
-        show-overflow
-        keep-source
-        ref="xTable"
-        max-height="100%"
-        align="center"
-        :data="tableData"
-        :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }"
-      >
+      <vxe-table v-if="tableLoad || tableData.length" stripe border show-overflow keep-source ref="xTable"
+        max-height="100%" align="center" :data="tableData"
+        :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }">
         <vxe-column type="checkbox" width="60"></vxe-column>
         <vxe-column field="key" title="名称" :edit-render="{}">
           <template #edit="{ row }">
             <vxe-input v-model="row.key" type="text"></vxe-input>
           </template>
         </vxe-column>
-        <!-- <vxe-column field="value" title="Value" :edit-render="{}">
-          <template #edit="{ row }">
-            <vxe-input v-model="row.value" type="text"></vxe-input>
-          </template>
-        </vxe-column> -->
       </vxe-table>
       <div v-else class="oc-empty">
         <el-empty description="暂无数据" />
