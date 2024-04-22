@@ -274,34 +274,34 @@ const handleOpened = async () => {
       station,
       stationOid: stationData.find((obj) => {
         return obj.name === station;
-      }).oid,
+      })?.oid,
       stationData,
       voltageOid: voltageData.find((obj) => {
         return obj.name === station + "/" + item.voltage;
-      }).oid,
+      })?.oid,
       voltageData,
       bayOid: bayData.find((obj) => {
         return obj.name === station + "/" + item.voltage + "/" + item.bay;
-      }).oid,
+      })?.oid,
       bayData,
       devOid: devData.find((obj) => {
         return (
           obj.name ===
           station + "/" + item.voltage + "/" + item.bay + "/" + item.dev
         );
-      }).oid,
+      })?.oid,
       devData,
       pTypeOid: pTypeData.find((obj) => {
         return obj.name === item.pType;
-      }).oid,
+      })?.oid,
       pTypeData,
       operateOid: operateData.find((obj) => {
         return obj.name === item.operate;
-      }).oid,
+      })?.oid,
       operateData,
       devStatusOid: devStatusData.find((obj) => {
         return obj.name === item.yxValue;
-      }).oid,
+      })?.oid,
       devStatusData,
     };
   });

@@ -35,19 +35,20 @@ html.dark {
     --vxe-select-option-hover-background-color: #003b51;
     --vxe-table-popup-border-color: #155093;
 
+    --el-border-color-lighter: #409eff33;
+
     .el-table {
         --el-table-header-bg-color: #00baff;
         --el-table-header-text-color: #ffffff;
-        --el-table-border: 0px solid var(--el-table-border-color);
+        // --el-table-border: 0px solid var(--el-table-border-color);
         --el-table-tr-bg-color: #003b51;
         --el-fill-color-lighter: #0a2732;
         --el-fill-color-light: #000000;
         --el-border-color: #155093;
-        --el-border-color-lighter: transform;
 
         tr {
             td {
-                transition: all 1s !important;
+                transition: all 0.5s !important;
             }
         }
     }
@@ -57,7 +58,7 @@ html.dark {
             background: linear-gradient(#003b51, #0a2732);
 
             &__header {
-                border-color: #0a2732;
+                border-color: rgba(0, 0, 0, 0.3);
             }
         }
     }

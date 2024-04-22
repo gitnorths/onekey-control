@@ -8,6 +8,11 @@
             <el-option v-for="item in stationOptions" :key="item.oid" :label="item.name" :value="item.oid" />
           </el-select>
         </el-form-item>
+        <el-form-item label="间隔">
+          <el-select v-model="bay" placeholder="请选择" clearable filterable @change="handleSelectChange('bay', $event)">
+            <el-option v-for="item in bayOptions" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onModalImport">
             顺控票导入
@@ -24,8 +29,9 @@
       <!-- <div v-if="!tableData.length" class="oc-empty">
         <el-empty description="暂无数据" />
       </div> -->
-      <el-table v-if="tableLoad || tableData.length" :data="tableData" :span-method="objectSpanMethod"
-        v-loading="tableLoad" stripe empty-text="暂无数据" class="oc-table">
+      <!-- :span-method="objectSpanMethod" -->
+      <el-table v-if="tableLoad || tableData.length" :data="tableData" v-loading="tableLoad" border stripe
+        empty-text="暂无数据" class="oc-table">
         <template v-for="(item, i) in tableColumn" :key="i">
           <el-table-column v-if="item.prop == 'operator'" :prop="item.prop" :label="item.label"
             :width="item.width ? item.width : null" :align="item.align ? item.align : null">
@@ -35,18 +41,41 @@
               </el-button>
             </template>
           </el-table-column>
+          <el-table-column v-else-if="item.prop === 'stepName'" :prop="item.prop" :label="item.label"
+            :width="item.width ? item.width : null" :align="item.align ? item.align : null"
+            :minWidth="item.minWidth ? item.minWidth : null">
+            <template #default="scope">
+              <div v-for="item in scope.row.stepName" :key="item">{{ item }}</div>
+            </template>
+          </el-table-column>
+          <el-table-column v-else-if="item.prop === 'conditionName'" :prop="item.prop" :label="item.label"
+            :width="item.width ? item.width : null" :align="item.align ? item.align : null"
+            :minWidth="item.minWidth ? item.minWidth : null">
+            <template #default="scope">
+              <div v-for="item in scope.row.conditionName" :key="item">{{ item }}</div>
+            </template>
+          </el-table-column>
+          <el-table-column v-else-if="item.prop === 'statusName'" :prop="item.prop" :label="item.label"
+            :width="item.width ? item.width : null" :align="item.align ? item.align : null"
+            :minWidth="item.minWidth ? item.minWidth : null">
+            <template #default="scope">
+              <div v-for="item in scope.row.statusName" :key="item">{{ item }}</div>
+            </template>
+          </el-table-column>
           <el-table-column v-else :prop="item.prop" :label="item.label" :width="item.width ? item.width : null"
-            :align="item.align ? item.align : null" />
+            :align="item.align ? item.align : null" :minWidth="item.minWidth ? item.minWidth : null" />
         </template>
       </el-table>
       <div v-else class="oc-empty">
         <el-empty description="暂无数据" />
       </div>
     </div>
+    <!-- 导入信息弹窗 -->
     <UploadModal v-model="uploadVisible" :title="uploadTitle" :width="uploadWidth" :url="uploadUrl"
       @confirm="uploadConfirm" @cancel="uploadCancel"></UploadModal>
-    <DSModal v-model="modalVisible" :title="modalTitle" :width="modalWidth" :data="modalData" @confirm="modalConfirm"
-      @cancel="modalCancel"></DSModal>
+    <!-- 确认信息弹窗 -->
+    <ControlModal v-model="modalVisible" :title="modalTitle" :width="modalWidth" :data="modalData"
+      @confirm="modalConfirm" @cancel="modalCancel"></ControlModal>
   </div>
 </template>
 <script setup>
@@ -56,7 +85,7 @@ import { baseUrl } from "@/config";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import UploadModal from "@/components/UploadModal.vue";
-import DSModal from "@/components/DSModal.vue";
+import ControlModal from "@/components/ControlModal.vue";
 
 const router = useRouter();
 
@@ -64,13 +93,18 @@ const station = ref(null);
 const stationName = ref(null);
 const stationOptions = ref([]);
 
+const bay = ref(null);
+const bayOptions = ref([]);
+
 const tableLoad = ref(true);
 const tableData = ref([]);
+const tableCache = ref([]);
 const tableColumn = ref([
   { prop: "index", label: "序号", width: "80px", align: "center" },
-  { prop: "state", label: "状态" },
-  { prop: "condition", label: "条件" },
-  { prop: "parseResults", label: "解析结果" },
+  { prop: "taskName", label: "操作任务", minWidth: "150px" },
+  { prop: "stepName", label: "操作步骤", minWidth: "150px" },
+  { prop: "conditionName", label: "操作前条件", minWidth: "300px" },
+  { prop: "statusName", label: "目标状态", minWidth: "200px" },
   { prop: "operator", label: "操作", width: "150px", align: "center" },
 ]);
 
@@ -103,7 +137,7 @@ const getStation = () => {
         station.value = resData.oid;
         stationName.value = resData.name;
         tableLoad.value = false;
-        // getDevstatus(resData.name); // 查询设备态信息
+        getOperatorTab(resData.name); // 查询设备态信息
       }
     })
     .catch((error) => {
@@ -112,35 +146,31 @@ const getStation = () => {
 };
 
 // 查询设备态信息
-const getDevstatus = (value) => {
+const getOperatorTab = (station) => {
   tableLoad.value = true;
-  mokeGet("getDevstatus", {
-    station: value,
+  mokeGet("getOptab", {
+    station,
   }).then((res) => {
     if (!res?.data) return (tableLoad.value = false);
     tableData.value = [];
-    const arr = [];
+    let bayArr = []; // bay数组
     for (let i = 0; i < res.data.length; i++) {
-      const dataStatus = res.data[i].status;
-      for (let j = 0; j < dataStatus.length; j++) {
-        const dataMap = dataStatus[j];
-        dataMap.parseMap.forEach((item) => {
-          tableData.value.push({
-            ...item,
-            index: dataMap.sequence,
-            state: dataMap.status,
-            station: res.data[i].station,
-            condition:
-              item.voltage + item.bay + item.dev + item.operate + item.yxValue,
-            parseResults: `${item.voltage}/${item.bay}/${item.dev}/${item.operate}/${item.yxValue}`,
-          });
+      const { bay, optab: opTabs } = res.data[i];
+      bayArr.push(bay);
+      opTabs.forEach((item) => {
+        tableCache.value.push({
+          ...item,
+          index: tableCache.value.length + 1,
+          taskName: item.task.rawInfo,
+          stepName: item.opt_step.rawInfo,
+          conditionName: item.pre_condition.rawInfo,
+          statusName: item.dst_status.rawInfo
         });
-      }
+      })
     }
-
-    // 给列表赋值
-    const colFields = ["index", "state"];
-    setTableRowSpan(tableData.value, colFields);
+    bayOptions.value = bayArr;
+    bay.value = bayArr?.length ? bayArr[0] : null;
+    handleSelectChange('bay', bayArr?.length ? bayArr[0] : null);
     tableLoad.value = false;
   });
 };
@@ -154,10 +184,20 @@ const handleSelectChange = (action, value) => {
           return item.oid === value;
         });
         stationName.value = obj.name;
-        getDevstatus(obj.name);
+        getOperatorTab(obj.name);
       }
       break;
-
+    case "bay":
+      {
+        if (!value) {
+          tableData.value = tableCache.value
+        } else {
+          tableData.value = tableCache.value.filter((item) => {
+            return item.taskName.includes(value);
+          });
+        }
+      }
+      break;
     default:
       break;
   }
@@ -196,7 +236,7 @@ const uploadConfirm = (data) => {
     return item.name === data[0].station;
   });
   station.value = obj.oid;
-  getDevstatus(data[0].station); // 查询设备态信息
+  getOperatorTab(data[0].station); // 查询设备态信息
 };
 
 // 导入取消
@@ -206,16 +246,15 @@ const uploadCancel = () => {
 
 // 确认信息
 const handleConfirm = (ids, rows) => {
-  console.log(ids, rows);
   modalVisible.value = true;
   modalTitle.value = "确认信息";
-  modalWidth.value = "450px";
+  modalWidth.value = "800px";
   modalData.value = rows;
 };
 
 const modalConfirm = () => {
   modalCancel();
-  getDevstatus(stationName.value); // 查询设备态信息
+  getOperatorTab(stationName.value); // 查询设备态信息
 };
 // 确认信息取消
 const modalCancel = () => {
