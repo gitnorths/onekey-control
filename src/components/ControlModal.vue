@@ -2,16 +2,25 @@
   <el-dialog v-model="visible" :title="title" :width="props.width" :show-close="false" :close-on-click-modal="false"
     :close-on-press-escape="false" destroy-on-close modal-class="dialog-import" @opened="handleOpened">
     <el-form ref="modalFormRef" :model="modalForm" :inline="true">
-      <!-- <el-form-item label="操作任务">
-        {{ modalForm.taskName }}
-      </el-form-item> -->
       <el-collapse v-model="activeName" class="collapse">
-        <el-collapse-item title="操作步骤" name="1">
-          <el-form-item v-for="(item, index) in modalForm.steps" :key="index" :prop="'steps.' + index" :rules="{
-            required: true,
-            message: '操作步骤不能为空！',
-            trigger: 'blur',
-          }">
+        <el-collapse-item title="操作任务" name="1">
+          <div>名称：{{ modalForm.taskName }}</div>
+          <el-form-item v-for="(item, i) in modalForm.tasks" :key="i" :prop="'tasks.' + i"
+            :rules="{ required: true, message: '不能为空！', trigger: 'blur', }">
+            <el-select v-model="modalForm.tasks[i].name" placeholder="请选择" filterable :style='`width:
+              ${modalForm.tasks[i].name.length * 40}px`'>
+              <el-option v-for="(value) in item.data" :key="value" :label="value" :value="value" />
+            </el-select>
+            <el-icon class="remove-icon" @click.prevent="removeSelected('task', i, item)">
+              <Remove />
+            </el-icon>
+          </el-form-item>
+          <el-button type="primary" :disabled="modalForm.steps.length >= stepOptions.length" :icon="Plus"
+            @click="addControl('task')" />
+        </el-collapse-item>
+        <el-collapse-item title="操作步骤" name="2">
+          <el-form-item v-for="(item, index) in modalForm.steps" :key="index" :prop="'steps.' + index"
+            :rules="{ required: true, message: '操作步骤不能为空！', trigger: 'blur', }">
             <el-select v-model="modalForm.steps[index]" placeholder="请选择" filterable>
               <el-option v-for="value in stepOptions" :key="value" :label="value" :value="value" />
             </el-select>
@@ -22,13 +31,10 @@
           <el-button type="primary" :disabled="modalForm.steps.length >= stepOptions.length" :icon="Plus"
             @click="addControl('step')" />
         </el-collapse-item>
-        <el-collapse-item title="操作前条件" name="2">
+        <el-collapse-item title="操作前条件" name="3">
           <el-form-item v-for="(item, index) in modalForm.conditions" :key="index"
-            :prop="'conditions.' + index + '.value'" :rules="{
-              required: true,
-              message: '操作前条件不能为空！',
-              trigger: 'blur',
-            }">
+            :prop="'conditions.' + index + '.value'"
+            :rules="{ required: true, message: '操作前条件不能为空！', trigger: 'blur', }">
             <el-select v-model="modalForm.conditions[index]" placeholder="请选择" filterable>
               <el-option v-for="value in conditionOptions" :key="value" :label="value" :value="value" />
             </el-select>
@@ -39,13 +45,9 @@
           <el-button type="primary" :disabled="modalForm.conditions.length >= conditionOptions.length" :icon="Plus"
             @click="addControl('condition')" />
         </el-collapse-item>
-        <el-collapse-item title="目标状态" name="3">
+        <el-collapse-item title="目标状态" name="4">
           <el-form-item v-for="(item, index) in modalForm.status" :key="index" :prop="'status.' + index + '.value'"
-            :rules="{
-              required: true,
-              message: '目标状态不能为空！',
-              trigger: 'blur',
-            }">
+            :rules="{ required: true, message: '目标状态不能为空！', trigger: 'blur', }">
             <el-select v-model="modalForm.status[index]" placeholder="请选择" filterable>
               <el-option v-for="value in statusOptions" :key="value" :label="value" :value="value" />
             </el-select>
@@ -72,7 +74,7 @@
 import { ref, reactive } from "vue";
 import { mokeGet, mokePost } from "@/api";
 import { ElMessage } from "element-plus";
-import { filter } from "lodash";
+import { filter, forIn } from "lodash";
 import { Plus } from '@element-plus/icons-vue'
 
 
@@ -101,33 +103,40 @@ const props = defineProps({
   },
 });
 
-const title = ref(`操作任务【${props.data.taskName}】${props.title}`); // 弹窗标题
+const title = ref(`操作任务`); // 弹窗标题
 const loading = ref(false); // 加载状态
 const activeName = ref("1"); // 当前激活的步骤
 const modalFormRef = ref(); // 表单实例
+const taskOptions = ref([]); // 操作任务选项
 const stepOptions = ref([]); // 操作步骤选项
 const conditionOptions = ref([]); // 操作前条件选项
 const statusOptions = ref([]); // 目标状态选项
 const initData = {
   taskName: "",
-  steps: [{
-    value: '',
-  }],
-  conditions: [{
-    key: 1,
-    value: '',
-  }],
-  status: [{
-    key: 1,
-    value: '',
-  }],
+  tasks: [],
+  steps: [{ value: '', }],
+  conditions: [{ value: '', }],
+  status: [{ value: '', }],
 }
 const modalForm = reactive({ ...initData });
 
 // 页面加载完成后初始化数据
 const handleOpened = () => {
+
+
+  title.value = `操作任务【${props.data.taskName}】${props.title}`; // 弹窗标题
   // 表单数据初始化
   modalForm.taskName = props.data.taskName;
+
+  console.log('tasks', props.data.task.parseMap, modalForm.tasks);
+  forIn(props.data.task.parseMap, (value, key) => {
+    modalForm.tasks.push({
+      name: value,
+      data: [props.data.task.parseMap[key]],
+    });
+  });
+  console.log(modalForm.tasks);
+
   modalForm.steps = stepOptions.value = props.data.opt_step.rawInfo.filter((item) => {
     return item !== undefined && item !== '' && item !== null;
   });
